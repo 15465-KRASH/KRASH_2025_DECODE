@@ -11,9 +11,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Spindexer {
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
+    private Spindexer spindexer;
 
     public DcMotorEx rotationMotor;
     public NormalizedColorSensor intakeSensor, leftSensor, rightSensor;
+
+    boolean pickedUp = false;
 
     public enum DetectedColor {
         GREEN,
@@ -65,5 +68,22 @@ public class Spindexer {
         rotationMotor.setPower(1);
     }
 
+    public void stop() {
+        rotationMotor.setPower(0);
+    }
+
+    public void rotateAfterPickup() {
+        if (spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.PURPLE || spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.GREEN) {
+            spindexer.rotate(60);
+            pickedUp = true;
+        }
+        if (pickedUp == true && spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.PURPLE || spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.GREEN) {
+            spindexer.stop();
+            pickedUp = false;
+        } else if (pickedUp == true && spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.NONE) {
+            spindexer.stop();
+            pickedUp = false;
+        }
+    }
 
 }
