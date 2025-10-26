@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.classes;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -27,11 +28,13 @@ public class Lift {
         leftClimbMotor = hardwareMap.get(DcMotorEx.class, "leftClimbMotor");
         rightClimbMotor = hardwareMap.get(DcMotorEx.class, "rightClimbMotor");
 
-        leftClimbMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightClimbMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         leftClimbMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rightClimbMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        rightClimbMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         setPIDFValues();
 
@@ -60,4 +63,14 @@ public class Lift {
         leftClimbMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(KvP, KvI, KvD, KV));
         rightClimbMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(KvP, KvI, KvD, KV));
     }
+
+    public void manualClimb(double power){
+        leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftClimbMotor.setPower(power);
+        rightClimbMotor.setPower(power);
+    }
+
+
 }
