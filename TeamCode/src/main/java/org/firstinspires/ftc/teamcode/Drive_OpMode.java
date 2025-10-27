@@ -38,6 +38,8 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.classes.ButtonState;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +68,8 @@ public class Drive_OpMode extends LinearOpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
+
+        ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
 
         double powerScale=1;
 
@@ -109,6 +113,12 @@ public class Drive_OpMode extends LinearOpMode {
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
+
+            if (liftTester.getCurrentPress()) {
+                m_robot.lift.manualClimb(0.2);
+            } else {
+                m_robot.lift.stopLift();
+            }
 
 
 
