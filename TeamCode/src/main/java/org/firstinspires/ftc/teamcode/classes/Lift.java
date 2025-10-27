@@ -10,7 +10,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Lift {
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
-
+    //leftClimbMotor - Expansion Hub Motor Port 2
+    //rightClimbMotor - Control Hub Motor Port 2
     public DcMotorEx leftClimbMotor, rightClimbMotor;
 
     public static double KV = 1.0;
