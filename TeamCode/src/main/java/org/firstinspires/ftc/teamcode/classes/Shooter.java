@@ -19,17 +19,17 @@ public class Shooter {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
-        flywheel = hardwareMap.get(DcMotorEx.class, "flywheelMotor");
-        loader = hardwareMap.get(CRServo.class, "loaderServo");
-        hood = hardwareMap.get(Servo.class, "hoodServo");
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+        loader = hardwareMap.get(CRServo.class, "loader");
+        hood = hardwareMap.get(Servo.class, "hood");
     }
 
     public void shoot() {
         flywheel.setPower(1);
     }
 
-    public void loadArtifact() {
-        loader.setPower(1);
+    public void loadArtifact(double pwr) {
+        loader.setPower(pwr);
     }
 
     public void adjustHood() {

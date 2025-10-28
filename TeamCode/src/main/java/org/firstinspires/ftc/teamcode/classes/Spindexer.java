@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.classes;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -15,14 +16,19 @@ public class Spindexer {
 
     public DcMotorEx rotationMotor;
     public NormalizedColorSensor intakeSensor, leftSensor, rightSensor;
+    public DistanceSensor distanceIntakeSensor;
 
     boolean pickedUp = false;
+
+    public int spindexerStep = 179;
 
     public enum DetectedColor {
         GREEN,
         PURPLE,
         NONE
     }
+
+    public DetectedColor[] spindexerPositions = {DetectedColor.NONE, DetectedColor.NONE,DetectedColor.NONE};
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
         //return red, green, blue, alpha (amount of light)
@@ -38,14 +44,39 @@ public class Spindexer {
         telemetry.addData("green", normGreen);
         telemetry.addData("blue", normBlue);
 
-        //TODO: add if statements for the specific colors
         /*
         COLOR = red, green, blue (use rough inequalities, not exact values)
-        PURPLE =
-        GREEN =
+        these are for NOT the intake sensor
+        PURPLE = r<0.9, g<1.1, b>1.1
+        GREEN = r<0.5, g>1.1, b>0.9
          */
 
-        return DetectedColor.NONE;
+        /*
+        COLOR = red, green, blue (use rough inequalities, not exact values)
+        these are FOR the intake sensor
+        PURPLE = r>1.1, g<2.0, b>1.9
+        GREEN = r<1.1, g>2.1, b>1.8
+         */
+        if (sensor != intakeSensor) {
+            if (normRed < 0.9 && normGreen < 1.1 && normBlue > 1.1) {
+                return DetectedColor.PURPLE;
+            } else if (normRed < 0.5 && normGreen > 1.1 && normBlue > 0.9) {
+                return DetectedColor.GREEN;
+            } else {
+                return DetectedColor.NONE;
+            }
+        } else if (sensor == intakeSensor) {
+            if (normRed < 1.8 && normGreen < 2.0 && normBlue > 1.9) {
+                return DetectedColor.PURPLE;
+            } else if (normRed < 1.1 && normGreen > 2.1 && normBlue > 1.8) {
+                return DetectedColor.GREEN;
+            } else {
+                return DetectedColor.NONE;
+            }
+        } else {
+            return DetectedColor.NONE;
+        }
+
     }
 
     public Spindexer(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -54,21 +85,28 @@ public class Spindexer {
 
         //assign values based on what's configured on the robot
         intakeSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeSensor");
+        distanceIntakeSensor = hardwareMap.get(DistanceSensor.class, "intakeSensor");
+
         leftSensor = hardwareMap.get(NormalizedColorSensor.class, "leftSensor");
         rightSensor = hardwareMap.get(NormalizedColorSensor.class, "rightSensor");
 
         rotationMotor = hardwareMap.get(DcMotorEx.class, "spindexerRotationMotor");
+        rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        //TODO: play around with the gain of the sensors during calibration (.setGain(int))
+        intakeSensor.setGain(100);
+        leftSensor.setGain(100);
+        rightSensor.setGain(100);
     }
 
     public void rotate(int pose) {
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotationMotor.setTargetPosition(pose);
-        rotationMotor.setPower(1);
+        //rotationMotor.setPower(1);
     }
 
     public void stop() {
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rotationMotor.setPower(0);
     }
 
@@ -84,6 +122,27 @@ public class Spindexer {
             spindexer.stop();
             pickedUp = false;
         }
+    }
+
+    public void initSpindexerArray(){
+        spindexerPositions[0] = DetectedColor.GREEN;
+        spindexerPositions[1] = DetectedColor.PURPLE;
+        spindexerPositions[2] = DetectedColor.PURPLE;
+    }
+
+    public int getSpidexerPos() {
+        return rotationMotor.getCurrentPosition();
+    }
+
+    public void runSpindexerPos(int pos){
+        rotationMotor.setTargetPosition(pos);
+        rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rotationMotor.setPower(0.3);
+    }
+
+    public void stopSpindexer(){
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotor.setPower(0);
     }
 
 }

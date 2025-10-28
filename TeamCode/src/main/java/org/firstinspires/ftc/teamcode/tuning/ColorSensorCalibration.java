@@ -1,27 +1,50 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.classes.ButtonState;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
 @TeleOp(name = "Calibrate Color Sensors", group = "Calibration")
-public class ColorSensorCalibration extends OpMode {
+public class ColorSensorCalibration extends LinearOpMode {
 
     Spindexer spindexer;
     Spindexer.DetectedColor detectedColor;
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
         spindexer  = new Spindexer(hardwareMap, telemetry);
-    }
 
-    @Override
-    public void loop() {
-        spindexer.getDetectedColor(spindexer.intakeSensor, telemetry);
-        spindexer.getDetectedColor(spindexer.leftSensor, telemetry);
-        spindexer.getDetectedColor(spindexer.rightSensor, telemetry);
+        ButtonState readIntake = new ButtonState(gamepad1, ButtonState.Button.a);
+        ButtonState readLeft = new ButtonState(gamepad1, ButtonState.Button.x);
+        ButtonState readRight = new ButtonState(gamepad1, ButtonState.Button.b);
 
-        telemetry.addData("color detected: ", detectedColor);
+        waitForStart();
+
+        //spindexer.getDetectedColor(spindexer.intakeSensor, telemetry);
+        //detectedColor = spindexer.getDetectedColor(spindexer.leftSensor, telemetry);
+        //spindexer.getDetectedColor(spindexer.rightSensor, telemetry);
+
+        while(opModeIsActive()) {
+            telemetry.addData("color detected: ", detectedColor);
+
+            if(readIntake.getCurrentPress()) {
+                detectedColor = spindexer.getDetectedColor(spindexer.intakeSensor, telemetry);
+                telemetry.addData("distance", spindexer.distanceIntakeSensor.getDistance(DistanceUnit.MM));
+            }
+            if(readLeft.getCurrentPress()) {
+                detectedColor = spindexer.getDetectedColor(spindexer.leftSensor, telemetry);
+            }
+            if(readRight.getCurrentPress()) {
+                detectedColor = spindexer.getDetectedColor(spindexer.rightSensor, telemetry);
+            }
+
+            telemetry.addData("Spindexer Pos", spindexer.getSpidexerPos());
+
+            telemetry.update();
+        }
     }
 }

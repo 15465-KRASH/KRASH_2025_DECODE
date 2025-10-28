@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.classes;
 
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -21,11 +22,14 @@ public class Intake {
 
         leftLowRoller = hardwareMap.get(CRServo.class, "leftLowRoller");
         rightLowRoller = hardwareMap.get(CRServo.class, "rightLowRoller");
+        leftLowRoller.setDirection(DcMotorSimple.Direction.REVERSE);
 
         leftMidRoller = hardwareMap.get(CRServo.class, "leftMidRoller");
         rightMidRoller = hardwareMap.get(CRServo.class, "rightMidRoller");
+        rightMidRoller.setDirection(DcMotorSimple.Direction.REVERSE);
 
         highRoller = hardwareMap.get(CRServo.class, "highRoller");
+        highRoller.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void intakeArtifact() {
