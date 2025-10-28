@@ -14,7 +14,12 @@ public class Spindexer {
     private Telemetry telemetry;
     private Spindexer spindexer;
 
-    public DcMotorEx rotationMotor;
+    public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
+    /*
+    * intakeSensor - Control Hub I2C Port 3
+    * leftSensor - Expansion Hub I2C Port 3
+    * rightSensor - Control Hub I2C Port 1
+    * */
     public NormalizedColorSensor intakeSensor, leftSensor, rightSensor;
     public DistanceSensor distanceIntakeSensor;
 

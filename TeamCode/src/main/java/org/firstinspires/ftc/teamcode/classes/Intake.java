@@ -12,8 +12,13 @@ public class Intake {
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
 
+    //leftLowRoller - Servo Hub Servo Port 3
+    //rightLowRoller - Servo Hub Servo Port 2
     public CRServo leftLowRoller, rightLowRoller;
+    //leftMidRoller - Servo Hub Servo Port 4
+    //rightMidRoller - Servo Hub Servo Port 1
     public CRServo leftMidRoller, rightMidRoller;
+    //highRoller - Servo Hub Servo Port 0
     public CRServo highRoller;
 
     public Intake(HardwareMap hardwareMap, Telemetry telemetry) {

@@ -11,9 +11,9 @@ public class Shooter {
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
 
-    public DcMotorEx flywheel;
-    public CRServo loader;
-    public Servo hood;
+    public DcMotorEx flywheel; //Control Hub Motor Port 3
+    public CRServo loader; //Servo Hub Servo Port 5
+    public Servo hood; //Control Hub Servo Port 5
 
     public Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;

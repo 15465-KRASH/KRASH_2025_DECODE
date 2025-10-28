@@ -107,6 +107,12 @@ public class MecanumDrive {
     public final AccelConstraint defaultAccelConstraint =
             new ProfileAccelConstraint(PARAMS.minProfileAccel, PARAMS.maxProfileAccel);
 
+    /*
+    * leftFront - Expansion Hub Motor Port 1
+    * leftBack - Expansion Hub Motor Port 0
+    * rightBack - Control Hub Motor Port 0
+    * rightFront - Control Hub Motor Port 1
+    * */
     public final DcMotorEx leftFront, leftBack, rightBack, rightFront;
 
     public final VoltageSensor voltageSensor;
