@@ -26,6 +26,11 @@ public class Spindexer {
     boolean pickedUp = false;
 
     public int spindexerStep = 179;
+    public int maxSpindexerRot = 5;
+    public int rot = 3*spindexerStep;
+
+    public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
+    public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
 
     public enum DetectedColor {
         GREEN,
@@ -33,7 +38,27 @@ public class Spindexer {
         NONE
     }
 
-    public DetectedColor[] spindexerPositions = {DetectedColor.NONE, DetectedColor.NONE,DetectedColor.NONE};
+    public DetectedColor[] spindexerSlots = {DetectedColor.NONE, DetectedColor.NONE,DetectedColor.NONE};
+
+    public Spindexer(HardwareMap hardwareMap, Telemetry telemetry) {
+        this.hardwareMap = hardwareMap;
+        this.telemetry = telemetry;
+
+        //assign values based on what's configured on the robot
+        intakeSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeSensor");
+        distanceIntakeSensor = hardwareMap.get(DistanceSensor.class, "intakeSensor");
+
+        leftSensor = hardwareMap.get(NormalizedColorSensor.class, "leftSensor");
+        rightSensor = hardwareMap.get(NormalizedColorSensor.class, "rightSensor");
+
+        rotationMotor = hardwareMap.get(DcMotorEx.class, "spindexerRotationMotor");
+        rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        intakeSensor.setGain(100);
+        leftSensor.setGain(100);
+        rightSensor.setGain(100);
+    }
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
         //return red, green, blue, alpha (amount of light)
@@ -84,25 +109,7 @@ public class Spindexer {
 
     }
 
-    public Spindexer(HardwareMap hardwareMap, Telemetry telemetry) {
-        this.hardwareMap = hardwareMap;
-        this.telemetry = telemetry;
 
-        //assign values based on what's configured on the robot
-        intakeSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeSensor");
-        distanceIntakeSensor = hardwareMap.get(DistanceSensor.class, "intakeSensor");
-
-        leftSensor = hardwareMap.get(NormalizedColorSensor.class, "leftSensor");
-        rightSensor = hardwareMap.get(NormalizedColorSensor.class, "rightSensor");
-
-        rotationMotor = hardwareMap.get(DcMotorEx.class, "spindexerRotationMotor");
-        rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        intakeSensor.setGain(100);
-        leftSensor.setGain(100);
-        rightSensor.setGain(100);
-    }
 
     public void rotate(int pose) {
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -129,10 +136,10 @@ public class Spindexer {
         }
     }
 
-    public void initSpindexerArray(){
-        spindexerPositions[0] = DetectedColor.GREEN;
-        spindexerPositions[1] = DetectedColor.PURPLE;
-        spindexerPositions[2] = DetectedColor.PURPLE;
+    public void initSpindexerforAuton(){
+        spindexerSlots[0] = DetectedColor.PURPLE;
+        spindexerSlots[1] = DetectedColor.PURPLE;
+        spindexerSlots[2] = DetectedColor.GREEN;
     }
 
     public int getSpidexerPos() {
@@ -149,5 +156,105 @@ public class Spindexer {
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rotationMotor.setPower(0);
     }
+
+    public void setSlot(int slotNum, DetectedColor color){
+        spindexerSlots[slotNum] = color;
+    }
+
+    public void clearSlot(int slotNum){
+        setSlot(slotNum, DetectedColor.NONE);
+    }
+
+    public void setSlotGreen(int slotNum){
+        setSlot(slotNum, DetectedColor.GREEN);
+    }
+
+    public void setSlotPurple(int slotNum){
+        setSlot(slotNum, DetectedColor.PURPLE);
+    }
+
+    public void moveToIntakePos(int slotnum){
+        int target = intakeSpindexPos[slotnum];
+        int finalTarget = calcNearestPos(target);
+        runSpindexerPos(finalTarget);
+    }
+
+    public void moveToShooterPos(int slotnum){
+        int target = shooterSpindexPos[slotnum];
+        int finalTarget = calcNearestPos(target);
+        runSpindexerPos(finalTarget);
+    }
+
+    public int calcNearestPos(int target) {
+        int currentPos = getSpidexerPos();
+
+        int currentRot = currentPos/rot;
+        int targetopt1 = target + currentRot * rot;
+        int targetopt2;
+        if(targetopt1 < currentPos){
+            targetopt2 = target + (currentRot+1) * rot;
+        } else {
+            targetopt2 = target + (currentRot-1) * rot;
+        }
+
+        int distance1 = Math.abs(targetopt1 - currentPos);
+        int distance2 = Math.abs(targetopt2 - currentPos);
+
+        int finalTarget;
+
+        if((distance1 <= distance2 && Math.abs(targetopt1/rot) <= maxSpindexerRot) || distance1==0){
+            finalTarget = targetopt1;
+        } else if((distance2 <= distance1 && Math.abs(targetopt2/rot) <= maxSpindexerRot) || distance2==0) {
+            finalTarget = targetopt2;
+        } else if (Math.abs(targetopt1/rot) <= maxSpindexerRot){
+            finalTarget = targetopt1;
+        } else {
+            finalTarget = targetopt2;
+        }
+
+//        System.out.println("CurrentPos = " + currentPos);
+//        System.out.println("Rot = " + currentRot);
+//        System.out.println("target = " + target);
+//        System.out.println("targetopt1 = " + targetopt1);
+//        System.out.println("targetopt2 = " + targetopt2);
+//        System.out.println("distance1 = " + distance1);
+//        System.out.println("distance2 = " + distance2);
+//
+//        System.out.println("finaltarget = " + finalTarget);
+
+        return finalTarget;
+    }
+
+    public int findEmptyIntakeSlot(){
+        int bestSlot = -1;
+        int bestDistance = Integer.MAX_VALUE;
+        int currentPos = getSpidexerPos();
+
+        for (int i = 0; i <= 2; i++) {
+            if(spindexerSlots[i] == DetectedColor.NONE){
+                int target = intakeSpindexPos[i];
+                int distance = Math.abs(calcNearestPos(target) - currentPos);
+                if(distance < bestDistance){
+                    bestSlot = i;
+                }
+            }
+        }
+
+        return bestSlot;
+    }
+
+    public boolean gotoClosestEmptyIntake(){
+        int targetSlot = findEmptyIntakeSlot();
+        if(targetSlot != -1){
+            moveToIntakePos(targetSlot);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
+
 
 }
