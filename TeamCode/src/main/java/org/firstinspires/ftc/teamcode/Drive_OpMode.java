@@ -106,6 +106,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
         ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
         ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
+        ButtonState spinPwr = new ButtonState(gamepad1, ButtonState.Button.start);
 
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.x);
         ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.b);
@@ -262,6 +263,11 @@ public class Drive_OpMode extends LinearOpMode {
                 }
                 m_robot.spindexer.setPIDF(pidf);
             }
+            if(spinPwr.newPress()){
+                m_robot.spindexer.spinPwr = m_robot.spindexer.spinPwr +0.05;
+                if(m_robot.spindexer.spinPwr > 1.0) {m_robot.spindexer.spinPwr = 0.05;}
+            }
+            telemetry.addData("Spin Power = ", m_robot.spindexer.spinPwr);
 
 
 

@@ -32,6 +32,8 @@ public class Spindexer {
     public int rot = 3*spindexerStep;
     public int spindexerTol = 10;
 
+    public double spinPwr = 0.6;
+
     public double intakeDistLimit = 75;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
@@ -161,10 +163,10 @@ public class Spindexer {
         return rotationMotor.getCurrentPosition();
     }
 
-    public void runSpindexerPos(int pos){
+    public void runSpindexerPos(int pos, double pwr){
         rotationMotor.setTargetPosition(pos);
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotationMotor.setPower(0.6);
+        rotationMotor.setPower(pwr);
     }
 
     public void stopSpindexer(){
@@ -197,13 +199,13 @@ public class Spindexer {
     public void moveToIntakePos(int slotnum){
         int target = intakeSpindexPos[slotnum];
         int finalTarget = calcNearestPos(target);
-        runSpindexerPos(finalTarget);
+        runSpindexerPos(finalTarget, spinPwr);
     }
 
     public void moveToShooterPos(int slotnum){
         int target = shooterSpindexPos[slotnum];
         int finalTarget = calcNearestPos(target);
-        runSpindexerPos(finalTarget);
+        runSpindexerPos(finalTarget, spinPwr);
     }
 
     public int calcNearestPos(int target) {
