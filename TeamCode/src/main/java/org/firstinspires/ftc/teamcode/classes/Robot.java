@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.classes.vision.Vision;
 
 public class Robot {
     private HardwareMap hardwareMap;
@@ -14,6 +15,7 @@ public class Robot {
     public Spindexer spindexer;
     public Shooter shooter;
     public Lift lift;
+    public Vision vision;
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
         this.hardwareMap = hardwareMap;
@@ -23,6 +25,7 @@ public class Robot {
         spindexer = new Spindexer(hardwareMap, telemetry);
         shooter = new Shooter(hardwareMap, telemetry);
         lift = new Lift(hardwareMap, telemetry);
+        vision = Vision.createDefault();
     }
 
 
