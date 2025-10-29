@@ -98,7 +98,7 @@ public class Drive_OpMode extends LinearOpMode {
 //            telemetry.addData("Lift Position", m_robot.lift.getCurrentExt());
 
 
-               if (gamepad1.right_bumper) {
+            if (gamepad1.right_bumper) {
                 powerScale=1;
             } else if (gamepad1.left_bumper) {
                 powerScale=.5;
