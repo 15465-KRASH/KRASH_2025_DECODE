@@ -70,6 +70,21 @@ public class Drive_OpMode extends LinearOpMode {
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
 
         ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
+        ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
+
+//        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
+//        ButtonState leftMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.x);
+//        ButtonState rightMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.b);
+//        ButtonState leftLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_left);
+//        ButtonState rightLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
+
+        ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.x);
+        ButtonState spitArtifact = new ButtonState(gamepad2, ButtonState.Button.b);
+        ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.a);
+
+        ButtonState testSpin = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
+        ButtonState spinTen = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
+
 
         double powerScale=1;
 
@@ -120,7 +135,65 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.lift.stopLift();
             }
 
+            if (loaderTest.getCurrentPress()) {
+                m_robot.shooter.loadArtifact(1.0);
+            }
 
+            if(testSpin.newPress()){
+                int currentPos = m_robot.spindexer.getSpidexerPos();
+                int newPos = currentPos - m_robot.spindexer.spindexerStep * 30;
+                m_robot.spindexer.runSpindexerPos(newPos);
+            }
+
+            if(spinTen.newPress()){
+                int currentPos = m_robot.spindexer.getSpidexerPos();
+                int newPos = currentPos + m_robot.spindexer.spindexerStep * 30;
+                m_robot.spindexer.runSpindexerPos(newPos);
+            }
+
+
+
+            /*******************************
+             * Servo Direction Test
+             *******************************/
+//            if(highRollerTest.getCurrentPress()){
+//                m_robot.intake.highRoller.setPower(1);
+//            } else {
+//                m_robot.intake.highRoller.setPower(0);
+//            }
+//            if(leftMidRollerTest.getCurrentPress()){
+//                m_robot.intake.leftMidRoller.setPower(1);
+//            } else {
+//                m_robot.intake.leftMidRoller.setPower(0);
+//            }
+//            if(rightMidRollerTest.getCurrentPress()){
+//                m_robot.intake.rightMidRoller.setPower(1);
+//            } else {
+//                m_robot.intake.rightMidRoller.setPower(0);
+//            }
+//            if(leftLowRollerTest.getCurrentPress()){
+//                m_robot.intake.leftLowRoller.setPower(1);
+//            } else {
+//                m_robot.intake.leftLowRoller.setPower(0);
+//            }
+//            if(rightLowRollerTest.getCurrentPress()){
+//                m_robot.intake.rightLowRoller.setPower(1);
+//            } else {
+//                m_robot.intake.rightLowRoller.setPower(0);
+//            }
+
+            if(intakeArtifact.getCurrentPress()){
+                m_robot.intake.intakeArtifact();
+            }
+            if(spitArtifact.getCurrentPress()){
+                m_robot.intake.spitArtifacts();
+            }
+            if(stopIntake.getCurrentPress()){
+                m_robot.intake.stop();
+            }
+
+            telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpidexerPos());
+            telemetry.update();
 
             // update running actions
             List<Action> newActions = new ArrayList<>();
