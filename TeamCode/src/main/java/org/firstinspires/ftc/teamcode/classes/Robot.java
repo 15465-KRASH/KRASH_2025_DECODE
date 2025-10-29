@@ -19,9 +19,9 @@ public class Robot {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
-//        intake = new Intake(hardwareMap, telemetry);
-//        spindexer = new Spindexer(hardwareMap, telemetry);
-//        shooter = new Shooter(hardwareMap, telemetry);
+        intake = new Intake(hardwareMap, telemetry);
+        spindexer = new Spindexer(hardwareMap, telemetry);
+        shooter = new Shooter(hardwareMap, telemetry);
         lift = new Lift(hardwareMap, telemetry);
     }
 

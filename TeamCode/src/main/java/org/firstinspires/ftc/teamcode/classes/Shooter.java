@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.classes;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -20,13 +21,16 @@ public class Shooter {
         this.telemetry = telemetry;
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         loader = hardwareMap.get(CRServo.class, "loader");
         hood = hardwareMap.get(Servo.class, "hood");
     }
 
     public void shoot() {
-        flywheel.setPower(1);
+        flywheel.setPower(0.5);
     }
+
+    public void stop(){flywheel.setPower(0);}
 
     public void loadArtifact(double pwr) {
         loader.setPower(pwr);
@@ -34,5 +38,9 @@ public class Shooter {
 
     public void adjustHood() {
         //TODO: do math to adjust hood based off of Limelight distance to tag data
+    }
+
+    public void slowFeed(){
+        loadArtifact(0.2);
     }
 }

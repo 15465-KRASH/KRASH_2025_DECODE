@@ -19,7 +19,6 @@ public class Robot {
     public Intake intake;
     public Spindexer spindexer;
 
-
     public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
@@ -32,5 +31,8 @@ public class Robot {
 
 
     }
+
+
+
 
 }

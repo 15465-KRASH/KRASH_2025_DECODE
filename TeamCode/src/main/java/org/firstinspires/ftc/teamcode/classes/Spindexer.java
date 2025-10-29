@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Spindexer {
     private HardwareMap hardwareMap;
@@ -28,6 +29,9 @@ public class Spindexer {
     public int spindexerStep = 179;
     public int maxSpindexerRot = 5;
     public int rot = 3*spindexerStep;
+    public int spindexerTol = 10;
+
+    public double intakeDistLimit = 75;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -58,6 +62,8 @@ public class Spindexer {
         intakeSensor.setGain(100);
         leftSensor.setGain(100);
         rightSensor.setGain(100);
+
+        clearAllSlots();
     }
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
@@ -109,6 +115,10 @@ public class Spindexer {
 
     }
 
+    public DetectedColor getIntakeColor(){
+        return getDetectedColor(intakeSensor, telemetry);
+    }
+
 
 
     public void rotate(int pose) {
@@ -142,6 +152,10 @@ public class Spindexer {
         spindexerSlots[2] = DetectedColor.GREEN;
     }
 
+    public DetectedColor getSlotColor(int x){
+        return spindexerSlots[x];
+    }
+
     public int getSpidexerPos() {
         return rotationMotor.getCurrentPosition();
     }
@@ -149,7 +163,7 @@ public class Spindexer {
     public void runSpindexerPos(int pos){
         rotationMotor.setTargetPosition(pos);
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotationMotor.setPower(0.3);
+        rotationMotor.setPower(0.6);
     }
 
     public void stopSpindexer(){
@@ -163,6 +177,12 @@ public class Spindexer {
 
     public void clearSlot(int slotNum){
         setSlot(slotNum, DetectedColor.NONE);
+    }
+
+    public void clearAllSlots(){
+        for(int x = 0; x <=2 ; x++){
+            clearSlot(x);
+        }
     }
 
     public void setSlotGreen(int slotNum){
@@ -243,15 +263,24 @@ public class Spindexer {
         return bestSlot;
     }
 
-    public boolean gotoClosestEmptyIntake(){
+    public int gotoClosestEmptyIntake(){
         int targetSlot = findEmptyIntakeSlot();
         if(targetSlot != -1){
             moveToIntakePos(targetSlot);
-            return true;
+            return targetSlot;
         } else {
-            return false;
+            return -1;
         }
     }
+
+    public boolean isIntakeSlotFull(){
+        return distanceIntakeSensor.getDistance(DistanceUnit.MM) < intakeDistLimit;
+    }
+
+    public boolean spindexerAtTarget(){
+        return Math.abs(rotationMotor.getTargetPosition() - rotationMotor.getCurrentPosition()) < spindexerTol;
+    }
+
 
 
 

@@ -35,9 +35,11 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 
 import java.util.ArrayList;
@@ -71,6 +73,7 @@ public class Drive_OpMode extends LinearOpMode {
 
         ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
         ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
+        ButtonState shoot = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
 
 //        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
 //        ButtonState leftMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -79,11 +82,13 @@ public class Drive_OpMode extends LinearOpMode {
 //        ButtonState rightLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
 
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.x);
-        ButtonState spitArtifact = new ButtonState(gamepad2, ButtonState.Button.b);
+        ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.b);
         ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.a);
 
         ButtonState testSpin = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
         ButtonState spinTen = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
+
+        int shooterPos = 0;
 
 
         double powerScale=1;
@@ -113,7 +118,7 @@ public class Drive_OpMode extends LinearOpMode {
 //            telemetry.addData("Lift Position", m_robot.lift.getCurrentExt());
 
 
-               if (gamepad1.right_bumper) {
+            if (gamepad1.right_bumper) {
                 powerScale=1;
             } else if (gamepad1.left_bumper) {
                 powerScale=.5;
@@ -151,6 +156,12 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.spindexer.runSpindexerPos(newPos);
             }
 
+            if(shoot.getCurrentPress()){
+                m_robot.shooter.shoot();
+            } else {
+                m_robot.shooter.stop();
+            }
+
 
 
             /*******************************
@@ -182,14 +193,25 @@ public class Drive_OpMode extends LinearOpMode {
 //                m_robot.intake.rightLowRoller.setPower(0);
 //            }
 
-            if(intakeArtifact.getCurrentPress()){
-                m_robot.intake.intakeArtifact();
+            if(intakeArtifact.newPress()){
+                Actions.runBlocking(new IntakeArtifact(m_robot.intake, m_robot.spindexer));
             }
-            if(spitArtifact.getCurrentPress()){
-                m_robot.intake.spitArtifacts();
+
+            if(nextShooterPos.newPress()){
+                shooterPos ++;
+                if (shooterPos > 2) {shooterPos = 0;}
+                m_robot.spindexer.moveToShooterPos(shooterPos);
             }
+
             if(stopIntake.getCurrentPress()){
                 m_robot.intake.stop();
+            }
+
+
+            for(int x = 0; x <=2; x++){
+                telemetry.addLine()
+                        .addData("Slot[", x)
+                        .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
             }
 
             telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpidexerPos());
