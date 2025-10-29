@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.classes.Spindexer;
 public class IntakeArtifact implements Action {
     private boolean initialized = false;
     private boolean running = true;
+    private boolean canceled = false;
     private int targetSlot = -1;
 
     private Intake intake;
@@ -23,36 +24,49 @@ public class IntakeArtifact implements Action {
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
-        targetSlot = spindexer.gotoClosestEmptyIntake();
-        if (!initialized && targetSlot != -1) {
-            intake.intakeArtifact();
-            initialized = true;
-            running = true;
-        } else if (!initialized){
-            intake.stop();
-            running = false;
-        }
-
-        if(running) {
-            if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
-                spindexer.setSlot(targetSlot, spindexer.getIntakeColor());
+        if (!canceled) {
+            if (!initialized) {
                 targetSlot = spindexer.gotoClosestEmptyIntake();
-                if (targetSlot != -1) {
-                    intake.intakeArtifact();
-                } else {
-                    intake.stop();
-                    running = false;
+            }
+            if (!initialized && targetSlot != -1) {
+                intake.intakeArtifact();
+                initialized = true;
+                running = true;
+            } else if (!initialized) {
+                intake.stop();
+                running = false;
+            }
+
+            if (running) {
+                if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
+                    spindexer.setSlot(targetSlot, spindexer.getIntakeColor());
+                    targetSlot = spindexer.gotoClosestEmptyIntake();
+                    if (targetSlot != -1) {
+                        intake.intakeArtifact();
+                    } else {
+                        intake.stop();
+                        running = false;
+                    }
                 }
             }
+            return running;
+        } else {
+            canceled = false;
+            return false;
         }
-
-
 //        packet.put("shooterVelocity", vel);
-        return running;
 
     }
 
-    public Action intakeArtifact(Intake intake, Spindexer spindexer){
-        return new IntakeArtifact(intake, spindexer);
+    public void cancel(){
+        canceled = true;
+        cleanup();
     }
+
+    public void cleanup(){
+        running = false;
+        intake.stop();
+        initialized = false;
+    }
+
 }

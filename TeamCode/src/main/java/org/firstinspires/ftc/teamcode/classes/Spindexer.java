@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -156,7 +157,7 @@ public class Spindexer {
         return spindexerSlots[x];
     }
 
-    public int getSpidexerPos() {
+    public int getSpindexerPos() {
         return rotationMotor.getCurrentPosition();
     }
 
@@ -206,7 +207,7 @@ public class Spindexer {
     }
 
     public int calcNearestPos(int target) {
-        int currentPos = getSpidexerPos();
+        int currentPos = getSpindexerPos();
 
         int currentRot = currentPos/rot;
         int targetopt1 = target + currentRot * rot;
@@ -248,7 +249,7 @@ public class Spindexer {
     public int findEmptyIntakeSlot(){
         int bestSlot = -1;
         int bestDistance = Integer.MAX_VALUE;
-        int currentPos = getSpidexerPos();
+        int currentPos = getSpindexerPos();
 
         for (int i = 0; i <= 2; i++) {
             if(spindexerSlots[i] == DetectedColor.NONE){
@@ -256,6 +257,7 @@ public class Spindexer {
                 int distance = Math.abs(calcNearestPos(target) - currentPos);
                 if(distance < bestDistance){
                     bestSlot = i;
+                    bestDistance = distance;
                 }
             }
         }
@@ -279,6 +281,18 @@ public class Spindexer {
 
     public boolean spindexerAtTarget(){
         return Math.abs(rotationMotor.getTargetPosition() - rotationMotor.getCurrentPosition()) < spindexerTol;
+    }
+
+    public PIDFCoefficients showPIDFVals(){
+        PIDFCoefficients pidfCoefficients = rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        telemetry.addData("P = ", pidfCoefficients.p);
+        telemetry.addData("I = ", pidfCoefficients.i);
+        telemetry.addData("D = ", pidfCoefficients.d);
+        telemetry.addData("F = ", pidfCoefficients.f);
+        return pidfCoefficients;
+    }
+    public void setPIDF(PIDFCoefficients pidf){
+        rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidf);
     }
 
 
