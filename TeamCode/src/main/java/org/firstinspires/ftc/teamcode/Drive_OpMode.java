@@ -41,6 +41,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
+import org.firstinspires.ftc.teamcode.actions.ShootAll;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 
 import java.util.ArrayList;
@@ -89,18 +90,24 @@ public class Drive_OpMode extends LinearOpMode {
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
+        ShootAll shootAllAction = new ShootAll(m_robot.shooter, m_robot.spindexer);
 
         PIDFVals pidfSel = PIDFVals.P;
 
         ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
         ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
-        ButtonState shoot = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
+        ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.right_bumper);
+        ButtonState shootAll = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
 
 //        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
 //        ButtonState leftMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.x);
 //        ButtonState rightMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.b);
 //        ButtonState leftLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_left);
 //        ButtonState rightLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
+
+        ButtonState intake0 = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
+        ButtonState intake1 = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
+        ButtonState intake2 = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
 
         ButtonState selectValUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
         ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
@@ -123,6 +130,8 @@ public class Drive_OpMode extends LinearOpMode {
         telemetry.update();
 
         // Wait for the game to start (driver presses START)
+        m_robot.intake.stop();
+        m_robot.shooter.loadArtifact(0);
         waitForStart();
 
         // run until the end of the match (driver presses STOP)
@@ -146,8 +155,9 @@ public class Drive_OpMode extends LinearOpMode {
             m_robot.drive.setDrivePowers(driveControl);
 
             if(intakeArtifact.newPress()){
+                intakeAction.clearCancel();
                 runningActions.add(intakeAction);
-            } else if (!intakeArtifact.getCurrentPress()){
+            } else if (intakeArtifact.newRelease()){
                 intakeAction.cancel();
             }
 
@@ -157,26 +167,61 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.spindexer.moveToShooterPos(shooterPos);
             }
 
+            if(spinUp.newPress()){
+                m_robot.shooter.spinUp();
+            }
+
+            if(shootAll.newPress()){
+                shootAllAction.clearCancel();
+                runningActions.add(shootAllAction);
+            } else if (shootAll.newRelease()){
+                shootAllAction.cancel();
+            }
+
 
             /***
              * Test Buttons
              ***/
             //TODO: Remove these when done testing!!
-            if (liftTester.getCurrentPress()) {
-                m_robot.lift.manualClimb(0.2);
-            } else {
-                m_robot.lift.stopLift();
+
+            if(intake0.newPress()){
+                m_robot.spindexer.moveToIntakePos(0);
+            }
+            if(intake1.newPress()){
+                m_robot.spindexer.moveToIntakePos(1);
+            }
+            if(intake2.newPress()){
+                m_robot.spindexer.moveToIntakePos(2);
             }
 
-            if (loaderTest.getCurrentPress()) {
-                m_robot.shooter.loadArtifact(1.0);
+            if(stopIntake.newPress()){
+                m_robot.spindexer.manualSpindexer();
+            } else if (stopIntake.newRelease()){
+                m_robot.spindexer.stop();
             }
 
-            if(shoot.getCurrentPress()){
-                m_robot.shooter.shoot();
-            } else {
-                m_robot.shooter.stop();
-            }
+
+//            if (liftTester.getCurrentPress()) {
+//                m_robot.lift.manualClimb(0.2);
+//            } else {
+//                m_robot.lift.stopLift();
+//            }
+
+//            if (loaderTest.newPress()) {
+//                m_robot.shooter.loadArtifact(1.0);
+//            } else if (loaderTest.newRelease()){
+//                m_robot.shooter.loadArtifact(-1.0);
+//            }
+//            if (liftTester.getCurrentPress()) {
+//                m_robot.shooter.loadArtifact(0);
+//            }
+
+
+//            if(shootAll.getCurrentPress()){
+//                m_robot.shooter.shoot();
+//            } else {
+//                m_robot.shooter.stop();
+//            }
 
 
 
@@ -220,7 +265,7 @@ public class Drive_OpMode extends LinearOpMode {
 
             telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpindexerPos());
 
-            PIDFCoefficients pidf = m_robot.spindexer.showPIDFVals();
+            PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
             if(selectValUp.newPress()){
                 pidfSel = pidfSel.next();
             }
@@ -235,7 +280,7 @@ public class Drive_OpMode extends LinearOpMode {
                         pidf.p = pidf.p + 0.1;
                         break;
                     case I:
-                        pidf.i = pidf.i + 0.1;
+                        pidf.i = pidf.i + 0.05;
                         break;
                     case D:
                         pidf.d = pidf.d + 0.1;
@@ -244,7 +289,7 @@ public class Drive_OpMode extends LinearOpMode {
                         pidf.f = pidf.f + 0.1;
                         break;
                 }
-                m_robot.spindexer.setPIDF(pidf);
+                m_robot.shooter.setPIDF(pidf);
             }
             if(valDown.newPress()){
                 switch(pidfSel) {
@@ -252,7 +297,7 @@ public class Drive_OpMode extends LinearOpMode {
                         pidf.p = pidf.p - 0.1;
                         break;
                     case I:
-                        pidf.i = pidf.i - 0.1;
+                        pidf.i = pidf.i - 0.05;
                         break;
                     case D:
                         pidf.d = pidf.d - 0.1;
@@ -261,7 +306,7 @@ public class Drive_OpMode extends LinearOpMode {
                         pidf.f = pidf.f - 0.1;
                         break;
                 }
-                m_robot.spindexer.setPIDF(pidf);
+                m_robot.shooter.setPIDF(pidf);
             }
             if(spinPwr.newPress()){
                 m_robot.spindexer.spinPwr = m_robot.spindexer.spinPwr +0.05;

@@ -24,6 +24,7 @@ public class ButtonState {
     }
 
     public boolean buttonHeld = false;
+    public boolean buttonReleased = true;
 
     Gamepad gamepad;
     Button button;
@@ -90,8 +91,12 @@ public class ButtonState {
                 break;
         }
 
+
+
         if (!buttonPress) {
             buttonHeld = false;
+        } else {
+            buttonReleased = false;
         }
         return buttonPress;
     }
@@ -106,6 +111,20 @@ public class ButtonState {
             return true;
         } else {
             buttonHeld = false;
+            return false;
+        }
+    }
+
+    public boolean newRelease(){
+        boolean state = getCurrentPress();
+
+        if(!state && buttonReleased){
+            return false;
+        } else if (!state){
+            buttonReleased = true;
+            return true;
+        } else {
+            buttonReleased = false;
             return false;
         }
     }

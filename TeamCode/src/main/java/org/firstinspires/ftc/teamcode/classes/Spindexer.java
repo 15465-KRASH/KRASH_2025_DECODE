@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.classes;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -17,6 +18,7 @@ public class Spindexer {
     private Spindexer spindexer;
 
     public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
+    public PIDFCoefficients pidfCoefficients;
     /*
     * intakeSensor - Control Hub I2C Port 3
     * leftSensor - Expansion Hub I2C Port 3
@@ -32,7 +34,7 @@ public class Spindexer {
     public int rot = 3*spindexerStep;
     public int spindexerTol = 10;
 
-    public double spinPwr = 0.6;
+    public double spinPwr = 0.5;
 
     public double intakeDistLimit = 75;
 
@@ -59,8 +61,15 @@ public class Spindexer {
         rightSensor = hardwareMap.get(NormalizedColorSensor.class, "rightSensor");
 
         rotationMotor = hardwareMap.get(DcMotorEx.class, "spindexerRotationMotor");
+//        rotationMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        pidfCoefficients =  rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        pidfCoefficients.p = 7.5;
+        pidfCoefficients.i = 1.5;
+        pidfCoefficients.d = 0.5;
+        setPIDF(pidfCoefficients);
 
         intakeSensor.setGain(100);
         leftSensor.setGain(100);
@@ -267,10 +276,39 @@ public class Spindexer {
         return bestSlot;
     }
 
+    public int findFullShooterSlot(){
+        int bestSlot = -1;
+        int bestDistance = Integer.MAX_VALUE;
+        int currentPos = getSpindexerPos();
+
+        for (int i = 0; i <= 2; i++) {
+            if(spindexerSlots[i] != DetectedColor.NONE){
+                int target = shooterSpindexPos[i];
+                int distance = Math.abs(calcNearestPos(target) - currentPos);
+                if(distance < bestDistance){
+                    bestSlot = i;
+                    bestDistance = distance;
+                }
+            }
+        }
+
+        return bestSlot;
+    }
+
     public int gotoClosestEmptyIntake(){
         int targetSlot = findEmptyIntakeSlot();
         if(targetSlot != -1){
             moveToIntakePos(targetSlot);
+            return targetSlot;
+        } else {
+            return -1;
+        }
+    }
+
+    public int gotoClosestFullShooter(){
+        int targetSlot = findFullShooterSlot();
+        if(targetSlot != -1){
+            moveToShooterPos(targetSlot);
             return targetSlot;
         } else {
             return -1;
@@ -297,7 +335,10 @@ public class Spindexer {
         rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidf);
     }
 
-
+    public void manualSpindexer(){
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotor.setPower(0.5);
+    }
 
 
 

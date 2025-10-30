@@ -32,7 +32,7 @@ public class IntakeArtifact implements Action {
                 intake.intakeArtifact();
                 initialized = true;
                 running = true;
-            } else if (!initialized) {
+            } else if (targetSlot == -1) {
                 intake.stop();
                 running = false;
             }
@@ -68,5 +68,19 @@ public class IntakeArtifact implements Action {
         intake.stop();
         initialized = false;
     }
+
+    public void clearCancel(){
+        canceled = false;
+    }
+
+    public final void sleep(long milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
 
 }
