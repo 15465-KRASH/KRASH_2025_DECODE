@@ -35,7 +35,6 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -81,6 +80,8 @@ public class Drive_OpMode extends LinearOpMode {
         }
     }
 
+
+
     @Override
     public void runOpMode() {
         FtcDashboard dash = FtcDashboard.getInstance();
@@ -89,14 +90,21 @@ public class Drive_OpMode extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
 
+        PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
+        pidf.p = 22;
+        pidf.i = 3;
+        pidf.d = 0;
+        pidf.f = 0;
+
+
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
         ShootAll shootAllAction = new ShootAll(m_robot.shooter, m_robot.spindexer);
 
-        PIDFVals pidfSel = PIDFVals.P;
+        //PIDFVals pidfSel = PIDFVals.P;
 
-        ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
-        ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
-        ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.right_bumper);
+//        ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
+//        ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
+        ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.y);
         ButtonState shootAll = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
 
 //        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
@@ -105,19 +113,20 @@ public class Drive_OpMode extends LinearOpMode {
 //        ButtonState leftLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_left);
 //        ButtonState rightLowRollerTest = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
 
-        ButtonState intake0 = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
-        ButtonState intake1 = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
-        ButtonState intake2 = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
-
-        ButtonState selectValUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
-        ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
-        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
-        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
-        ButtonState spinPwr = new ButtonState(gamepad1, ButtonState.Button.start);
-
-        ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.x);
-        ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.b);
-        ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.a);
+//        ButtonState intake0 = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
+//        ButtonState intake1 = new ButtonState(gamepad2, ButtonState.Button.dpad_right);
+//        ButtonState intake2 = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
+//
+//        ButtonState selectValUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
+//        ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
+//        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
+//        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
+        ButtonState spinPwrUp = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
+        ButtonState spinPwrDwn = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
+//
+        ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
+        ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.x);
+        ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
 
         int shooterPos = 0;
 
@@ -184,15 +193,15 @@ public class Drive_OpMode extends LinearOpMode {
              ***/
             //TODO: Remove these when done testing!!
 
-            if(intake0.newPress()){
-                m_robot.spindexer.moveToIntakePos(0);
-            }
-            if(intake1.newPress()){
-                m_robot.spindexer.moveToIntakePos(1);
-            }
-            if(intake2.newPress()){
-                m_robot.spindexer.moveToIntakePos(2);
-            }
+//            if(intake0.newPress()){
+//                m_robot.spindexer.moveToIntakePos(0);
+//            }
+//            if(intake1.newPress()){
+//                m_robot.spindexer.moveToIntakePos(1);
+//            }
+//            if(intake2.newPress()){
+//                m_robot.spindexer.moveToIntakePos(2);
+//            }
 
             if(stopIntake.newPress()){
                 m_robot.spindexer.manualSpindexer();
@@ -265,54 +274,60 @@ public class Drive_OpMode extends LinearOpMode {
 
             telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpindexerPos());
 
-            PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
-            if(selectValUp.newPress()){
-                pidfSel = pidfSel.next();
-            }
-            if(selectValDown.newPress()){
-                pidfSel = pidfSel.prev();
-            }
-            telemetry.addData("Modifying ", pidfSel.name());
 
-            if(valUp.newPress()){
-                switch(pidfSel) {
-                    case P:
-                        pidf.p = pidf.p + 0.1;
-                        break;
-                    case I:
-                        pidf.i = pidf.i + 0.05;
-                        break;
-                    case D:
-                        pidf.d = pidf.d + 0.1;
-                        break;
-                    case F:
-                        pidf.f = pidf.f + 0.1;
-                        break;
-                }
-                m_robot.shooter.setPIDF(pidf);
-            }
-            if(valDown.newPress()){
-                switch(pidfSel) {
-                    case P:
-                        pidf.p = pidf.p - 0.1;
-                        break;
-                    case I:
-                        pidf.i = pidf.i - 0.05;
-                        break;
-                    case D:
-                        pidf.d = pidf.d - 0.1;
-                        break;
-                    case F:
-                        pidf.f = pidf.f - 0.1;
-                        break;
-                }
-                m_robot.shooter.setPIDF(pidf);
-            }
-            if(spinPwr.newPress()){
-                m_robot.spindexer.spinPwr = m_robot.spindexer.spinPwr +0.05;
-                if(m_robot.spindexer.spinPwr > 1.0) {m_robot.spindexer.spinPwr = 0.05;}
-            }
+//            if(selectValUp.newPress()){
+//                pidfSel = pidfSel.next();
+//            }
+//            if(selectValDown.newPress()){
+//                pidfSel = pidfSel.prev();
+//            }
+//            telemetry.addData("Modifying ", pidfSel.name());
+//
+//            if(valUp.newPress()){
+//                switch(pidfSel) {
+//                    case P:
+//                        pidf.p = pidf.p + 0.1;
+//                        break;
+//                    case I:
+//                        pidf.i = pidf.i + 0.05;
+//                        break;
+//                    case D:
+//                        pidf.d = pidf.d + 0.1;
+//                        break;
+//                    case F:
+//                        pidf.f = pidf.f + 0.1;
+//                        break;
+//                }
+//                m_robot.shooter.setPIDF(pidf);
+//            }
+//            if(valDown.newPress()){
+//                switch(pidfSel) {
+//                    case P:
+//                        pidf.p = pidf.p - 0.1;
+//                        break;
+//                    case I:
+//                        pidf.i = pidf.i - 0.05;
+//                        break;
+//                    case D:
+//                        pidf.d = pidf.d - 0.1;
+//                        break;
+//                    case F:
+//                        pidf.f = pidf.f - 0.1;
+//                        break;
+//                }
+//                m_robot.shooter.setPIDF(pidf);
+//            }
+//            if(spinPwrUp.newPress()){
+//                m_robot.spindexer.spinPwr = m_robot.spindexer.spinPwr +0.05;
+//                if(m_robot.spindexer.spinPwr > 1.0) {m_robot.spindexer.spinPwr = 0.05;}
+//            }
+//            if (spinPwrDwn.newPress()) {
+//                m_robot.spindexer.spinPwr = m_robot.spindexer.spinPwr -0.05;
+//                if(m_robot.spindexer.spinPwr < 0.0) {m_robot.spindexer.spinPwr = 1.00;
+//            }
+            m_robot.shooter.setPIDF(pidf);
             telemetry.addData("Spin Power = ", m_robot.spindexer.spinPwr);
+            telemetry.addData("PIDF = ", m_robot.shooter.showPIDFVals());
 
 
 

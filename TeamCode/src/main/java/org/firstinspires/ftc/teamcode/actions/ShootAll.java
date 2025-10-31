@@ -90,7 +90,7 @@ public class ShootAll implements Action {
                     } else {
                         waiting = true;
                         lastshot = true;
-                        targetSlot = 3; //Nonesense value
+                        targetSlot = 3; //Nonsense value
                         safeMove = false;
                     }
                 }
@@ -107,6 +107,7 @@ public class ShootAll implements Action {
             }
 
             if(safeMove){
+                spindexer.getAllDetectedColors(spindexer.intakeSensor, spindexer.leftSensor, spindexer.rightSensor);
                 targetSlot = spindexer.gotoClosestFullShooter();
                 safeMove = false;
             }

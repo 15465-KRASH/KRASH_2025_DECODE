@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.classes;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -78,6 +77,12 @@ public class Spindexer {
         clearAllSlots();
     }
 
+    public void getAllDetectedColors(NormalizedColorSensor intake, NormalizedColorSensor left, NormalizedColorSensor right) {
+        spindexer.getDetectedColor(intake, telemetry);
+        spindexer.getDetectedColor(left, telemetry);
+        spindexer.getDetectedColor(right, telemetry);
+    }
+
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
         //return red, green, blue, alpha (amount of light)
         NormalizedRGBA colors = sensor.getNormalizedColors();
@@ -92,31 +97,19 @@ public class Spindexer {
         telemetry.addData("green", normGreen);
         telemetry.addData("blue", normBlue);
 
-        /*
-        COLOR = red, green, blue (use rough inequalities, not exact values)
-        these are for NOT the intake sensor
-        PURPLE = r<0.9, g<1.1, b>1.1
-        GREEN = r<0.5, g>1.1, b>0.9
-         */
 
-        /*
-        COLOR = red, green, blue (use rough inequalities, not exact values)
-        these are FOR the intake sensor
-        PURPLE = r>1.1, g<2.0, b>1.9
-        GREEN = r<1.1, g>2.1, b>1.8
-         */
         if (sensor != intakeSensor) {
-            if (normRed < 0.9 && normGreen < 1.1 && normBlue > 1.1) {
+            if (normRed < 1.1 && normGreen < 1.3 && normBlue > 0.8) {
                 return DetectedColor.PURPLE;
-            } else if (normRed < 0.5 && normGreen > 1.1 && normBlue > 0.9) {
+            } else if (normRed < 0.7 && normGreen > 0.9 && normBlue > 0.7) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;
             }
         } else if (sensor == intakeSensor) {
-            if (normRed < 1.8 && normGreen < 2.0 && normBlue > 1.9) {
+            if (normRed > 0.9 && normGreen < 2.2 && normBlue > 1.7) {
                 return DetectedColor.PURPLE;
-            } else if (normRed < 1.1 && normGreen > 2.1 && normBlue > 1.8) {
+            } else if (normRed < 1.3 && normGreen > 1.8 && normBlue > 1.5) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;
