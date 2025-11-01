@@ -18,6 +18,7 @@ public class Spindexer {
 
     public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
     public PIDFCoefficients pidfCoefficients;
+    public PIDFCoefficients pidfCoefficientsClose;
     /*
     * intakeSensor - Control Hub I2C Port 3
     * leftSensor - Expansion Hub I2C Port 3
@@ -31,11 +32,12 @@ public class Spindexer {
     public int spindexerStep = 179;
     public int maxSpindexerRot = 5;
     public int rot = 3*spindexerStep;
-    public int spindexerTol = 10;
+    public int spindexerInitialTol = 10;
+    public int spindexerFinalTol = 5;
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 75;
+    public double intakeDistLimit = 80;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -70,6 +72,10 @@ public class Spindexer {
         pidfCoefficients.i = 1.5;
         pidfCoefficients.d = 0.5;
         setPIDF(pidfCoefficients);
+        pidfCoefficientsClose = pidfCoefficients;
+        pidfCoefficientsClose.p = 15;
+
+
 
         intakeSensor.setGain(100);
         leftSensor.setGain(100);
@@ -78,10 +84,16 @@ public class Spindexer {
         clearAllSlots();
     }
 
-    public void getAllDetectedColors(NormalizedColorSensor intake, NormalizedColorSensor left, NormalizedColorSensor right) {
-        spindexer.getDetectedColor(intake, telemetry);
-        spindexer.getDetectedColor(left, telemetry);
-        spindexer.getDetectedColor(right, telemetry);
+    public void setAllColors() {
+        DetectedColor intake = spindexer.getDetectedColor(intakeSensor, telemetry);
+        DetectedColor left = spindexer.getDetectedColor(leftSensor, telemetry);
+        DetectedColor right = spindexer.getDetectedColor(rightSensor, telemetry);
+
+        if (spindexer.getSpindexerPos() > -5 && spindexer.getSpindexerPos() < 5) {
+            spindexerSlots[0] = intake;
+            spindexerSlots[1] = right;
+            spindexerSlots[2] = left;
+        }
     }
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
@@ -99,7 +111,7 @@ public class Spindexer {
         telemetry.addData("blue", normBlue);
 
 
-        if (sensor != intakeSensor) {
+        if (sensor == leftSensor) {
             if (normRed < 1.1 && normGreen < 1.3 && normBlue > 0.8) {
                 return DetectedColor.PURPLE;
             } else if (normRed < 0.7 && normGreen > 0.9 && normBlue > 0.7) {
@@ -111,6 +123,14 @@ public class Spindexer {
             if (normRed > 0.9 && normGreen < 2.2 && normBlue > 1.7) {
                 return DetectedColor.PURPLE;
             } else if (normRed < 1.3 && normGreen > 1.8 && normBlue > 1.5) {
+                return DetectedColor.GREEN;
+            } else {
+                return DetectedColor.NONE;
+            }
+        } else if(sensor == rightSensor) {
+            if (normRed > 0.5 && normGreen > 1.2 && normBlue > 0.7) {
+                return DetectedColor.PURPLE;
+            } else if (normRed < 1.3 && normGreen < 1.4 && normBlue > 0.5) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;
@@ -320,7 +340,18 @@ public class Spindexer {
     }
 
     public boolean spindexerAtTarget(){
-        return Math.abs(rotationMotor.getTargetPosition() - rotationMotor.getCurrentPosition()) < spindexerTol;
+        int currentTarget = rotationMotor.getTargetPosition();
+        int tol = Math.abs(currentTarget - rotationMotor.getCurrentPosition());
+        boolean done = false;
+        if(tol < spindexerInitialTol){
+            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficientsClose);
+            runSpindexerPos(currentTarget, spinPwr);
+        }
+        done = tol <= spindexerFinalTol;
+        if(done){
+            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficients);
+        }
+        return done;
     }
 
     public PIDFCoefficients showPIDFVals(){

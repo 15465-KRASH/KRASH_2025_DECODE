@@ -17,6 +17,7 @@ public class Shooter {
     public DcMotorEx flywheel; //Control Hub Motor Port 3
     public CRServo loader; //Servo Hub Servo Port 5
     public Servo hood; //Control Hub Servo Port 5
+    PIDFCoefficients pidfCoefficients;
 
     private static final int ticksPerRev = 28;
     public int targetRPM = 2500;
@@ -32,6 +33,12 @@ public class Shooter {
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        pidfCoefficients =  flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        pidfCoefficients.i = 0;
+        pidfCoefficients.d = 0.5;
+        pidfCoefficients.f = 2;
+        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         loader = hardwareMap.get(CRServo.class, "loader");
         hood = hardwareMap.get(Servo.class, "hood");

@@ -20,6 +20,8 @@ public class ShootAllVariant implements Action {
     private int targetSlot = -1;
     private double shotTime = 0.75;
     private boolean waiting = false;
+
+    private Spindexer.DetectedColor[] shotOrder = {Spindexer.DetectedColor.PURPLE, Spindexer.DetectedColor.GREEN, Spindexer.DetectedColor.PURPLE};
     
     private int totalShots = 3;
     private int currentShot = 0;
@@ -27,10 +29,10 @@ public class ShootAllVariant implements Action {
     private Spindexer.DetectedColor colorTarget = Spindexer.DetectedColor.ANY;
 
     //Timers
-    private double firstShotHoldMin = 0.5;
-    private double firstShotWait = 0.5;
-    private double secondShotWait = 0.5;
-    private double finalShotWait = 0.5;
+    private double firstShotHoldMin = 1.5;
+    private double firstShotWait = 1.0;
+    private double secondShotWait = 1.0;
+    private double finalShotWait = 2.0;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -85,12 +87,12 @@ public class ShootAllVariant implements Action {
             } else {
                 if (currentShot == 1 && waiting) {
                     waiting = timer.seconds() <= firstShotHoldMin;
-                } else if (currentShot == 2) {
+                } else if (currentShot == 2 && atSpeed) {
                     waiting = timer.seconds() <= firstShotWait;
                     if (!waiting) {
                         spindexer.moveToShooterPos(targetSlot);
                     }
-                } else if (currentShot == 3) {
+                } else if (currentShot == 3 && atSpeed) {
                     waiting = timer.seconds() <= secondShotWait;
                     if (!waiting) {
                         spindexer.moveToShooterPos(targetSlot);
@@ -123,6 +125,7 @@ public class ShootAllVariant implements Action {
                     }
 
                     timer.reset();
+                    waiting = true;
 
                     packet.put("Next target slot", targetSlot);
                 }
@@ -155,7 +158,7 @@ public class ShootAllVariant implements Action {
                 break;
             case ShootPattern:
                 // TODO: Replace with method supplying pattern color order
-                colorTarget = Spindexer.DetectedColor.ANY;
+                colorTarget = getColorTarget(shotNumber);
                 totalShots = 3;
                 break;
             case ShootAll:
@@ -188,6 +191,10 @@ public class ShootAllVariant implements Action {
 
     public boolean isRunning(){
         return running;
+    }
+
+    public Spindexer.DetectedColor getColorTarget(int shotNum) {
+        return shotOrder[shotNum-1];
     }
 
     public final void sleep(long milliseconds) {
