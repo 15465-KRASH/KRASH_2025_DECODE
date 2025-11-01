@@ -41,6 +41,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ShootAll;
+import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class Drive_OpMode extends LinearOpMode {
 
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
-        ShootAll shootAllAction = new ShootAll(m_robot.shooter, m_robot.spindexer);
+        ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
 
         //PIDFVals pidfSel = PIDFVals.P;
 
@@ -106,6 +107,10 @@ public class Drive_OpMode extends LinearOpMode {
 //        ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
         ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.y);
         ButtonState shootAll = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
+        ButtonState shootPattern = new ButtonState(gamepad2, ButtonState.Button.left_trigger);
+        ButtonState shootGreen = new ButtonState(gamepad2, ButtonState.Button.left_stick_button);
+        ButtonState shootPurple = new ButtonState(gamepad2, ButtonState.Button.right_stick_button);
+        ButtonState shootAny = new ButtonState(gamepad2, ButtonState.Button.left_bumper);
 
 //        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
 //        ButtonState leftMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -127,6 +132,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
         ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.x);
         ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
+        ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
 
         int shooterPos = 0;
 
@@ -170,6 +176,18 @@ public class Drive_OpMode extends LinearOpMode {
                 intakeAction.cancel();
             }
 
+            if(stopIntake.newPress()){
+                m_robot.spindexer.manualSpindexer();
+            } else if (stopIntake.newRelease()){
+                m_robot.spindexer.stop();
+            }
+
+            if(reverseIntake.newPress()){
+                m_robot.intake.spitArtifacts();
+            } else if (reverseIntake.newRelease()){
+                m_robot.intake.stop();
+            }
+
             if(nextShooterPos.newPress()){
                 shooterPos ++;
                 if (shooterPos > 2) {shooterPos = 0;}
@@ -178,13 +196,50 @@ public class Drive_OpMode extends LinearOpMode {
 
             if(spinUp.newPress()){
                 m_robot.shooter.spinUp();
+            } else if (spinUp.newRelease()){
+                if(!shootAction.isRunning()){
+                    m_robot.shooter.idle();
+                }
             }
 
             if(shootAll.newPress()){
-                shootAllAction.clearCancel();
-                runningActions.add(shootAllAction);
+                shootAction.clearCancel();
+                shootAction.selectShot(ShootAllVariant.ShotType.ShootAll);
+                runningActions.add(shootAction);
             } else if (shootAll.newRelease()){
-                shootAllAction.cancel();
+                shootAction.cancel();
+            }
+
+            if(shootPattern.newPress()){
+                shootAction.clearCancel();
+                shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
+                runningActions.add(shootAction);
+            } else if (shootAll.newRelease()){
+                shootAction.cancel();
+            }
+
+            if(shootGreen.newPress()){
+                shootAction.clearCancel();
+                shootAction.selectShot(ShootAllVariant.ShotType.ShootGreen);
+                runningActions.add(shootAction);
+            } else if (shootAll.newRelease()){
+                shootAction.cancel();
+            }
+
+            if(shootPurple.newPress()){
+                shootAction.clearCancel();
+                shootAction.selectShot(ShootAllVariant.ShotType.ShootPurple);
+                runningActions.add(shootAction);
+            } else if (shootAll.newRelease()){
+                shootAction.cancel();
+            }
+
+            if(shootAny.newPress()){
+                shootAction.clearCancel();
+                shootAction.selectShot(ShootAllVariant.ShotType.ShootAnySingle);
+                runningActions.add(shootAction);
+            } else if (shootAll.newRelease()){
+                shootAction.cancel();
             }
 
 
@@ -203,11 +258,7 @@ public class Drive_OpMode extends LinearOpMode {
 //                m_robot.spindexer.moveToIntakePos(2);
 //            }
 
-            if(stopIntake.newPress()){
-                m_robot.spindexer.manualSpindexer();
-            } else if (stopIntake.newRelease()){
-                m_robot.spindexer.stop();
-            }
+
 
 
 //            if (liftTester.getCurrentPress()) {

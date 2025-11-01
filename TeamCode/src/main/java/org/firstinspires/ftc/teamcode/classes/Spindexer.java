@@ -43,7 +43,8 @@ public class Spindexer {
     public enum DetectedColor {
         GREEN,
         PURPLE,
-        NONE
+        NONE,
+        ANY
     }
 
     public DetectedColor[] spindexerSlots = {DetectedColor.NONE, DetectedColor.NONE,DetectedColor.NONE};
@@ -269,13 +270,19 @@ public class Spindexer {
         return bestSlot;
     }
 
-    public int findFullShooterSlot(){
+    public int findFullShooterSlot(DetectedColor color){
         int bestSlot = -1;
         int bestDistance = Integer.MAX_VALUE;
         int currentPos = getSpindexerPos();
+        boolean colorMatch = false;
 
         for (int i = 0; i <= 2; i++) {
-            if(spindexerSlots[i] != DetectedColor.NONE){
+            if(color == DetectedColor.ANY){
+                colorMatch = spindexerSlots[i] != DetectedColor.NONE;
+            } else {
+                colorMatch = spindexerSlots[i] == color;
+            }
+            if(colorMatch){
                 int target = shooterSpindexPos[i];
                 int distance = Math.abs(calcNearestPos(target) - currentPos);
                 if(distance < bestDistance){
@@ -298,8 +305,8 @@ public class Spindexer {
         }
     }
 
-    public int gotoClosestFullShooter(){
-        int targetSlot = findFullShooterSlot();
+    public int gotoClosestFullShooter(DetectedColor color){
+        int targetSlot = findFullShooterSlot(color);
         if(targetSlot != -1){
             moveToShooterPos(targetSlot);
             return targetSlot;
