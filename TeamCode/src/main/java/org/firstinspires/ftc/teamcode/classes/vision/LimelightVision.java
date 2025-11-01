@@ -46,17 +46,20 @@ public class LimelightVision implements Vision {
 
     @Override
     public void setPipeline(Pipeline pipeline) {
-        if (pipeline == null)
+        if (pipeline == null) {
             return;
+        }
         currentPipeline = pipeline;
-        if (limelight != null)
+        if (limelight != null) {
             limelight.pipelineSwitch(currentPipeline.ordinal());
+        }
     }
 
     @Override
     public LLResult getLatestResult() {
-        if (limelight == null)
+        if (limelight == null) {
             return null;
+        }
         LLResult r = limelight.getLatestResult();
         return (r != null && r.isValid()) ? r : null;
     }

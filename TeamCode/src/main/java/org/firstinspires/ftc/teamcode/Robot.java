@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Lift;
 import org.firstinspires.ftc.teamcode.classes.Shooter;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
+import org.firstinspires.ftc.teamcode.classes.vision.Vision;
 
 public class Robot {
     private HardwareMap hardwareMap;
