@@ -40,7 +40,7 @@ public class ShootAll implements Action {
                 shooter.spinUp();
                 initialized = true;
                 safeMove = false;
-                targetSlot = spindexer.gotoClosestFullShooter();
+                targetSlot = spindexer.gotoClosestFullShooter(Spindexer.DetectedColor.ANY);
                 running = true;
                 timer.reset();
 //                packet.put("Finished Init", 0);
@@ -79,7 +79,7 @@ public class ShootAll implements Action {
 
 //                    sleep(2000);
 
-                    targetSlot = spindexer.findFullShooterSlot();
+                    targetSlot = spindexer.findFullShooterSlot(Spindexer.DetectedColor.ANY);
                     packet.put("Next target slot", targetSlot);
 
 //                    sleep(2000);
@@ -108,7 +108,7 @@ public class ShootAll implements Action {
 
             if(safeMove){
                 spindexer.getAllDetectedColors(spindexer.intakeSensor, spindexer.leftSensor, spindexer.rightSensor);
-                targetSlot = spindexer.gotoClosestFullShooter();
+                targetSlot = spindexer.gotoClosestFullShooter(Spindexer.DetectedColor.ANY);
                 safeMove = false;
             }
 

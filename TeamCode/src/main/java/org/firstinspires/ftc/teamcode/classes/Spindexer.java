@@ -18,6 +18,7 @@ public class Spindexer {
 
     public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
     public PIDFCoefficients pidfCoefficients;
+    public PIDFCoefficients pidfCoefficientsClose;
     /*
     * intakeSensor - Control Hub I2C Port 3
     * leftSensor - Expansion Hub I2C Port 3
@@ -31,11 +32,12 @@ public class Spindexer {
     public int spindexerStep = 179;
     public int maxSpindexerRot = 5;
     public int rot = 3*spindexerStep;
-    public int spindexerTol = 10;
+    public int spindexerInitialTol = 10;
+    public int spindexerFinalTol = 5;
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 75;
+    public double intakeDistLimit = 80;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -70,6 +72,10 @@ public class Spindexer {
         pidfCoefficients.i = 1.5;
         pidfCoefficients.d = 0.5;
         setPIDF(pidfCoefficients);
+        pidfCoefficientsClose = pidfCoefficients;
+        pidfCoefficientsClose.p = 15;
+
+
 
         intakeSensor.setGain(100);
         leftSensor.setGain(100);
@@ -320,7 +326,18 @@ public class Spindexer {
     }
 
     public boolean spindexerAtTarget(){
-        return Math.abs(rotationMotor.getTargetPosition() - rotationMotor.getCurrentPosition()) < spindexerTol;
+        int currentTarget = rotationMotor.getTargetPosition();
+        int tol = Math.abs(currentTarget - rotationMotor.getCurrentPosition());
+        boolean done = false;
+        if(tol < spindexerInitialTol){
+            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficientsClose);
+            runSpindexerPos(currentTarget, spinPwr);
+        }
+        done = tol <= spindexerFinalTol;
+        if(done){
+            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficients);
+        }
+        return done;
     }
 
     public PIDFCoefficients showPIDFVals(){
