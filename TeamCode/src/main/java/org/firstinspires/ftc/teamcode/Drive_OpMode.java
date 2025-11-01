@@ -37,10 +37,8 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.classes.Robot;
 
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
-import org.firstinspires.ftc.teamcode.classes.vision.Vision;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +85,6 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState testSpin = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
         ButtonState spinTen = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
 
-        ButtonState driveToTag = new ButtonState(gamepad1, ButtonState.Button.a);
 
         double powerScale=1;
 
@@ -108,16 +105,13 @@ public class Drive_OpMode extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+            /**************************
+             Example telemetry
+             **************************/
 //            telemetry.addData("Extension Position", m_robot.intake.getCurrentExt());
 //            telemetry.addData("Lift Position", m_robot.lift.getCurrentExt());
 
-            Vision.TargetData td = m_robot.vision.processFrame();
-            telemetry.addData("Valid Target: ", td.isAcquired);
-            if (td.isAcquired && td.botPose != null) {
-                telemetry.addData("X", td.xPosition);
-                telemetry.addData("Y", td.yPosition);
-                telemetry.addData("Z", td.zPosition);
-            }
 
             if (gamepad1.right_bumper) {
                 powerScale=1;
@@ -134,10 +128,6 @@ public class Drive_OpMode extends LinearOpMode {
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
-
-            if (driveToTag.buttonHeld) {
-
-            }
 
             if (liftTester.getCurrentPress()) {
                 m_robot.lift.manualClimb(0.2);

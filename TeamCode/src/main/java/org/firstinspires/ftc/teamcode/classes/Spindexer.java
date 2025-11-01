@@ -6,8 +6,10 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Spindexer {
     private HardwareMap hardwareMap;
@@ -15,6 +17,7 @@ public class Spindexer {
     private Spindexer spindexer;
 
     public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
+    public PIDFCoefficients pidfCoefficients;
     /*
     * intakeSensor - Control Hub I2C Port 3
     * leftSensor - Expansion Hub I2C Port 3
@@ -28,6 +31,11 @@ public class Spindexer {
     public int spindexerStep = 179;
     public int maxSpindexerRot = 5;
     public int rot = 3*spindexerStep;
+    public int spindexerTol = 10;
+
+    public double spinPwr = 0.5;
+
+    public double intakeDistLimit = 75;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -35,7 +43,8 @@ public class Spindexer {
     public enum DetectedColor {
         GREEN,
         PURPLE,
-        NONE
+        NONE,
+        ANY
     }
 
     public DetectedColor[] spindexerSlots = {DetectedColor.NONE, DetectedColor.NONE,DetectedColor.NONE};
@@ -52,12 +61,27 @@ public class Spindexer {
         rightSensor = hardwareMap.get(NormalizedColorSensor.class, "rightSensor");
 
         rotationMotor = hardwareMap.get(DcMotorEx.class, "spindexerRotationMotor");
+//        rotationMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        pidfCoefficients =  rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        pidfCoefficients.p = 7.5;
+        pidfCoefficients.i = 1.5;
+        pidfCoefficients.d = 0.5;
+        setPIDF(pidfCoefficients);
 
         intakeSensor.setGain(100);
         leftSensor.setGain(100);
         rightSensor.setGain(100);
+
+        clearAllSlots();
+    }
+
+    public void getAllDetectedColors(NormalizedColorSensor intake, NormalizedColorSensor left, NormalizedColorSensor right) {
+        spindexer.getDetectedColor(intake, telemetry);
+        spindexer.getDetectedColor(left, telemetry);
+        spindexer.getDetectedColor(right, telemetry);
     }
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
@@ -74,31 +98,19 @@ public class Spindexer {
         telemetry.addData("green", normGreen);
         telemetry.addData("blue", normBlue);
 
-        /*
-        COLOR = red, green, blue (use rough inequalities, not exact values)
-        these are for NOT the intake sensor
-        PURPLE = r<0.9, g<1.1, b>1.1
-        GREEN = r<0.5, g>1.1, b>0.9
-         */
 
-        /*
-        COLOR = red, green, blue (use rough inequalities, not exact values)
-        these are FOR the intake sensor
-        PURPLE = r>1.1, g<2.0, b>1.9
-        GREEN = r<1.1, g>2.1, b>1.8
-         */
         if (sensor != intakeSensor) {
-            if (normRed < 0.9 && normGreen < 1.1 && normBlue > 1.1) {
+            if (normRed < 1.1 && normGreen < 1.3 && normBlue > 0.8) {
                 return DetectedColor.PURPLE;
-            } else if (normRed < 0.5 && normGreen > 1.1 && normBlue > 0.9) {
+            } else if (normRed < 0.7 && normGreen > 0.9 && normBlue > 0.7) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;
             }
         } else if (sensor == intakeSensor) {
-            if (normRed < 1.8 && normGreen < 2.0 && normBlue > 1.9) {
+            if (normRed > 0.9 && normGreen < 2.2 && normBlue > 1.7) {
                 return DetectedColor.PURPLE;
-            } else if (normRed < 1.1 && normGreen > 2.1 && normBlue > 1.8) {
+            } else if (normRed < 1.3 && normGreen > 1.8 && normBlue > 1.5) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;
@@ -107,6 +119,10 @@ public class Spindexer {
             return DetectedColor.NONE;
         }
 
+    }
+
+    public DetectedColor getIntakeColor(){
+        return getDetectedColor(intakeSensor, telemetry);
     }
 
 
@@ -142,14 +158,18 @@ public class Spindexer {
         spindexerSlots[2] = DetectedColor.GREEN;
     }
 
-    public int getSpidexerPos() {
+    public DetectedColor getSlotColor(int x){
+        return spindexerSlots[x];
+    }
+
+    public int getSpindexerPos() {
         return rotationMotor.getCurrentPosition();
     }
 
-    public void runSpindexerPos(int pos){
+    public void runSpindexerPos(int pos, double pwr){
         rotationMotor.setTargetPosition(pos);
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotationMotor.setPower(0.3);
+        rotationMotor.setPower(pwr);
     }
 
     public void stopSpindexer(){
@@ -165,6 +185,12 @@ public class Spindexer {
         setSlot(slotNum, DetectedColor.NONE);
     }
 
+    public void clearAllSlots(){
+        for(int x = 0; x <=2 ; x++){
+            clearSlot(x);
+        }
+    }
+
     public void setSlotGreen(int slotNum){
         setSlot(slotNum, DetectedColor.GREEN);
     }
@@ -176,17 +202,17 @@ public class Spindexer {
     public void moveToIntakePos(int slotnum){
         int target = intakeSpindexPos[slotnum];
         int finalTarget = calcNearestPos(target);
-        runSpindexerPos(finalTarget);
+        runSpindexerPos(finalTarget, spinPwr);
     }
 
     public void moveToShooterPos(int slotnum){
         int target = shooterSpindexPos[slotnum];
         int finalTarget = calcNearestPos(target);
-        runSpindexerPos(finalTarget);
+        runSpindexerPos(finalTarget, spinPwr);
     }
 
     public int calcNearestPos(int target) {
-        int currentPos = getSpidexerPos();
+        int currentPos = getSpindexerPos();
 
         int currentRot = currentPos/rot;
         int targetopt1 = target + currentRot * rot;
@@ -228,7 +254,7 @@ public class Spindexer {
     public int findEmptyIntakeSlot(){
         int bestSlot = -1;
         int bestDistance = Integer.MAX_VALUE;
-        int currentPos = getSpidexerPos();
+        int currentPos = getSpindexerPos();
 
         for (int i = 0; i <= 2; i++) {
             if(spindexerSlots[i] == DetectedColor.NONE){
@@ -236,6 +262,7 @@ public class Spindexer {
                 int distance = Math.abs(calcNearestPos(target) - currentPos);
                 if(distance < bestDistance){
                     bestSlot = i;
+                    bestDistance = distance;
                 }
             }
         }
@@ -243,16 +270,75 @@ public class Spindexer {
         return bestSlot;
     }
 
-    public boolean gotoClosestEmptyIntake(){
+    public int findFullShooterSlot(DetectedColor color){
+        int bestSlot = -1;
+        int bestDistance = Integer.MAX_VALUE;
+        int currentPos = getSpindexerPos();
+        boolean colorMatch = false;
+
+        for (int i = 0; i <= 2; i++) {
+            if(color == DetectedColor.ANY){
+                colorMatch = spindexerSlots[i] != DetectedColor.NONE;
+            } else {
+                colorMatch = spindexerSlots[i] == color;
+            }
+            if(colorMatch){
+                int target = shooterSpindexPos[i];
+                int distance = Math.abs(calcNearestPos(target) - currentPos);
+                if(distance < bestDistance){
+                    bestSlot = i;
+                    bestDistance = distance;
+                }
+            }
+        }
+
+        return bestSlot;
+    }
+
+    public int gotoClosestEmptyIntake(){
         int targetSlot = findEmptyIntakeSlot();
         if(targetSlot != -1){
             moveToIntakePos(targetSlot);
-            return true;
+            return targetSlot;
         } else {
-            return false;
+            return -1;
         }
     }
 
+    public int gotoClosestFullShooter(DetectedColor color){
+        int targetSlot = findFullShooterSlot(color);
+        if(targetSlot != -1){
+            moveToShooterPos(targetSlot);
+            return targetSlot;
+        } else {
+            return -1;
+        }
+    }
+
+    public boolean isIntakeSlotFull(){
+        return distanceIntakeSensor.getDistance(DistanceUnit.MM) < intakeDistLimit;
+    }
+
+    public boolean spindexerAtTarget(){
+        return Math.abs(rotationMotor.getTargetPosition() - rotationMotor.getCurrentPosition()) < spindexerTol;
+    }
+
+    public PIDFCoefficients showPIDFVals(){
+        PIDFCoefficients pidfCoefficients = rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+        telemetry.addData("P = ", pidfCoefficients.p);
+        telemetry.addData("I = ", pidfCoefficients.i);
+        telemetry.addData("D = ", pidfCoefficients.d);
+        telemetry.addData("F = ", pidfCoefficients.f);
+        return pidfCoefficients;
+    }
+    public void setPIDF(PIDFCoefficients pidf){
+        rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidf);
+    }
+
+    public void manualSpindexer(){
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotor.setPower(0.5);
+    }
 
 
 
