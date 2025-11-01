@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.annotation.SuppressLint;
 import android.widget.Button;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -45,6 +46,8 @@ import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ShootAll;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
+import org.firstinspires.ftc.teamcode.classes.vision.Vision;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +88,7 @@ public class Drive_OpMode extends LinearOpMode {
 
 
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
         FtcDashboard dash = FtcDashboard.getInstance();
@@ -92,6 +96,10 @@ public class Drive_OpMode extends LinearOpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
+
+        Vision vision = Vision.createDefault();
+        vision.init(hardwareMap, "limelight", Vision.Pipeline.APRIL_TAG);
+        vision.start();
 
         PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
         pidf.p = 22;
@@ -137,6 +145,8 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
         ButtonState readColors = new ButtonState(gamepad2, ButtonState.Button.start);
 
+
+
         int shooterPos = 0;
 
 
@@ -171,6 +181,17 @@ public class Drive_OpMode extends LinearOpMode {
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
+
+            Vision.TargetData tagData = vision.processFrame();
+            telemetry.addData("NoTargetFrames", vision.getStatus().getConsecutiveNoTargetFrames());
+            if (tagData != null && tagData.isAcquired) {
+                telemetry.addData("BotPose (m)", String.format("x=%.2f  y=%.2f  z=%.2f", tagData.xPosition, tagData.yPosition, tagData.zPosition));
+                try {
+                    packet.fieldOverlay().strokeCircle(tagData.xPosition, tagData.yPosition, 0.05);
+                } catch (Exception ignored) { }
+            } else {
+                telemetry.addLine("AprilTag: no valid target");
+            }
 
             if(intakeArtifact.newPress()){
                 intakeAction.clearCancel();
@@ -387,9 +408,6 @@ public class Drive_OpMode extends LinearOpMode {
             m_robot.shooter.setPIDF(pidf);
             telemetry.addData("Spin Power = ", m_robot.spindexer.spinPwr);
             telemetry.addData("PIDF = ", m_robot.shooter.showPIDFVals());
-
-
-
 
             // update running actions
             List<Action> newActions = new ArrayList<>();
