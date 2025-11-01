@@ -84,10 +84,16 @@ public class Spindexer {
         clearAllSlots();
     }
 
-    public void getAllDetectedColors(NormalizedColorSensor intake, NormalizedColorSensor left, NormalizedColorSensor right) {
-        spindexer.getDetectedColor(intake, telemetry);
-        spindexer.getDetectedColor(left, telemetry);
-        spindexer.getDetectedColor(right, telemetry);
+    public void setAllColors() {
+        DetectedColor intake = spindexer.getDetectedColor(intakeSensor, telemetry);
+        DetectedColor left = spindexer.getDetectedColor(leftSensor, telemetry);
+        DetectedColor right = spindexer.getDetectedColor(rightSensor, telemetry);
+
+        if (spindexer.getSpindexerPos() > -5 && spindexer.getSpindexerPos() < 5) {
+            spindexerSlots[0] = intake;
+            spindexerSlots[1] = right;
+            spindexerSlots[2] = left;
+        }
     }
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
@@ -105,7 +111,7 @@ public class Spindexer {
         telemetry.addData("blue", normBlue);
 
 
-        if (sensor != intakeSensor) {
+        if (sensor == leftSensor) {
             if (normRed < 1.1 && normGreen < 1.3 && normBlue > 0.8) {
                 return DetectedColor.PURPLE;
             } else if (normRed < 0.7 && normGreen > 0.9 && normBlue > 0.7) {
@@ -117,6 +123,14 @@ public class Spindexer {
             if (normRed > 0.9 && normGreen < 2.2 && normBlue > 1.7) {
                 return DetectedColor.PURPLE;
             } else if (normRed < 1.3 && normGreen > 1.8 && normBlue > 1.5) {
+                return DetectedColor.GREEN;
+            } else {
+                return DetectedColor.NONE;
+            }
+        } else if(sensor == rightSensor) {
+            if (normRed > 0.5 && normGreen > 1.2 && normBlue > 0.7) {
+                return DetectedColor.PURPLE;
+            } else if (normRed < 1.3 && normGreen < 1.4 && normBlue > 0.5) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;

@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.widget.Button;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
@@ -133,6 +135,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.x);
         ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
         ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
+        ButtonState readColors = new ButtonState(gamepad2, ButtonState.Button.start);
 
         int shooterPos = 0;
 
@@ -192,6 +195,11 @@ public class Drive_OpMode extends LinearOpMode {
                 shooterPos ++;
                 if (shooterPos > 2) {shooterPos = 0;}
                 m_robot.spindexer.moveToShooterPos(shooterPos);
+            }
+
+            if(readColors.getCurrentPress()) {
+                m_robot.spindexer.getSpindexerPos();
+
             }
 
             if(spinUp.newPress()){

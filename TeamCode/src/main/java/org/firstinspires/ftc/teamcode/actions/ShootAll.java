@@ -107,7 +107,7 @@ public class ShootAll implements Action {
             }
 
             if(safeMove){
-                spindexer.getAllDetectedColors(spindexer.intakeSensor, spindexer.leftSensor, spindexer.rightSensor);
+                //spindexer.getAllDetectedColors();
                 targetSlot = spindexer.gotoClosestFullShooter(Spindexer.DetectedColor.ANY);
                 safeMove = false;
             }
