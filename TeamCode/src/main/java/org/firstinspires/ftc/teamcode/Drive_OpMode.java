@@ -41,6 +41,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -167,19 +168,38 @@ public class Drive_OpMode extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
+        LLResult llResult;
+
         // Wait for the game to start (driver presses START)
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         waitForStart();
 
+        while (!isStarted() && !isStopRequested()) {
+            llResult = m_robot.limelight.getLatestResult();
+            if (llResult != null) {
+                if (llResult.isValid()) {
+                    // Access AprilTag results
+                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    }
+                }
+            }
+        }
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
             //m_robot.limelight.updateRobotOrientation(m_robot.drive.localizer.)
-            LLResult llResult = m_robot.limelight.getLatestResult();
+            llResult = m_robot.limelight.getLatestResult();
             if (llResult != null) {
                 if (llResult.isValid()) {
-                    Pose3D botpose = llResult.getBotpose_MT2();
+                    // Access AprilTag results
+                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    }
                 }
             }
 

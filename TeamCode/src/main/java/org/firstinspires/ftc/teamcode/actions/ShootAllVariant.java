@@ -21,7 +21,8 @@ public class ShootAllVariant implements Action {
     private double shotTime = 0.75;
     private boolean waiting = false;
 
-    private Spindexer.DetectedColor[] shotOrder = {Spindexer.DetectedColor.PURPLE, Spindexer.DetectedColor.GREEN, Spindexer.DetectedColor.PURPLE};
+    //previously purple green purple
+    private Spindexer.DetectedColor[] shotOrder = {Spindexer.DetectedColor.NONE, Spindexer.DetectedColor.NONE, Spindexer.DetectedColor.NONE};
     
     private int totalShots = 3;
     private int currentShot = 0;
