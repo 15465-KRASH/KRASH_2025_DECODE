@@ -20,7 +20,7 @@ public class Shooter {
     PIDFCoefficients pidfCoefficients;
 
     private static final int ticksPerRev = 28;
-    public int targetRPM = 2500;
+    public int targetRPM = 3250;
     public int targetRPS = targetRPM / 60;
     public int targetSpeed = targetRPS * ticksPerRev;
     public int idleSpeed = 1000 / 60 / ticksPerRev;

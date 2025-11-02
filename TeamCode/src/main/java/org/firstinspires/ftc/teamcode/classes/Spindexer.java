@@ -85,15 +85,13 @@ public class Spindexer {
     }
 
     public void setAllColors() {
-        DetectedColor intake = spindexer.getDetectedColor(intakeSensor, telemetry);
-        DetectedColor left = spindexer.getDetectedColor(leftSensor, telemetry);
-        DetectedColor right = spindexer.getDetectedColor(rightSensor, telemetry);
+        DetectedColor intake = getDetectedColor(intakeSensor, telemetry);
+        DetectedColor left = getDetectedColor(leftSensor, telemetry);
+        DetectedColor right = getDetectedColor(rightSensor, telemetry);
 
-        if (spindexer.getSpindexerPos() > -5 && spindexer.getSpindexerPos() < 5) {
             spindexerSlots[0] = intake;
-            spindexerSlots[1] = right;
-            spindexerSlots[2] = left;
-        }
+            spindexerSlots[1] = left;
+            spindexerSlots[2] = right;
     }
 
     public DetectedColor getDetectedColor(NormalizedColorSensor sensor, Telemetry telemetry) {
@@ -106,9 +104,9 @@ public class Spindexer {
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
 
-        telemetry.addData("red", normRed);
-        telemetry.addData("green", normGreen);
-        telemetry.addData("blue", normBlue);
+//        telemetry.addData("red", normRed);
+//        telemetry.addData("green", normGreen);
+//        telemetry.addData("blue", normBlue);
 
 
         if (sensor == leftSensor) {
@@ -370,7 +368,6 @@ public class Spindexer {
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rotationMotor.setPower(0.5);
     }
-
 
 
 
