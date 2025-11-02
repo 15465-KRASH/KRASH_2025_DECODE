@@ -26,6 +26,9 @@ public class Shooter {
     public int idleSpeed = 1000 / 60 / ticksPerRev;
     public double speedTol = 2 / 100.0; //Percent
 
+    public double hoodMin = 0;
+    public double hoodMax = 0;
+
     public Shooter(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
@@ -42,6 +45,9 @@ public class Shooter {
 
         loader = hardwareMap.get(CRServo.class, "loader");
         hood = hardwareMap.get(Servo.class, "hood");
+        hood.setDirection(Servo.Direction.REVERSE);
+
+        hood.setPosition(0);
     }
 
     public void shoot() {
@@ -74,6 +80,10 @@ public class Shooter {
         //TODO: do math to adjust hood based off of Limelight distance to tag data
     }
 
+    public void setHood(double pos){
+        hood.setPosition(pos);
+    }
+
     public void slowFeed() {
         loadArtifact(0.2);
     }
@@ -83,10 +93,10 @@ public class Shooter {
     }
     public PIDFCoefficients showPIDFVals(){
         PIDFCoefficients pidfCoefficients = flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        telemetry.addData("P = ", pidfCoefficients.p);
-        telemetry.addData("I = ", pidfCoefficients.i);
-        telemetry.addData("D = ", pidfCoefficients.d);
-        telemetry.addData("F = ", pidfCoefficients.f);
+//        telemetry.addData("P = ", pidfCoefficients.p);
+//        telemetry.addData("I = ", pidfCoefficients.i);
+//        telemetry.addData("D = ", pidfCoefficients.d);
+//        telemetry.addData("F = ", pidfCoefficients.f);
         return pidfCoefficients;
     }
     public void setPIDF(PIDFCoefficients pidf){

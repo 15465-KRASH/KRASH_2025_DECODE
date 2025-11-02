@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static com.qualcomm.robotcore.util.Range.clip;
+
 import android.annotation.SuppressLint;
 import android.widget.Button;
 
@@ -38,15 +40,20 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ShootAll;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
+import org.firstinspires.ftc.teamcode.classes.vision.LimelightVision;
 import org.firstinspires.ftc.teamcode.classes.vision.Vision;
+import com.qualcomm.robotcore.util.Range;
 
 
 import java.util.ArrayList;
@@ -97,15 +104,18 @@ public class Drive_OpMode extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
 
-        Vision vision = Vision.createDefault();
-        vision.init(hardwareMap, "limelight", Vision.Pipeline.APRIL_TAG);
-        vision.start();
+        telemetry.setMsTransmissionInterval(11);
+        m_robot.limelight.pipelineSwitch(0);
+        m_robot.limelight.start();
 
         PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
         pidf.p = 22;
         pidf.i = 3;
         pidf.d = 0;
         pidf.f = 0;
+
+        double hoodPos = 0;
+        double hoodInc = 0.05;
 
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
@@ -134,8 +144,8 @@ public class Drive_OpMode extends LinearOpMode {
 //
 //        ButtonState selectValUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
 //        ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
-//        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
-//        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
+        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
+        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
         ButtonState spinPwrUp = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
         ButtonState spinPwrDwn = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
 //
@@ -165,6 +175,14 @@ public class Drive_OpMode extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            //m_robot.limelight.updateRobotOrientation(m_robot.drive.localizer.)
+            LLResult llResult = m_robot.limelight.getLatestResult();
+            if (llResult != null) {
+                if (llResult.isValid()) {
+                    Pose3D botpose = llResult.getBotpose_MT2();
+                }
+            }
+
             // Drive Code
             if (gamepad1.right_bumper) {
                 powerScale=1;
@@ -181,17 +199,6 @@ public class Drive_OpMode extends LinearOpMode {
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
-
-            Vision.TargetData tagData = vision.processFrame();
-            telemetry.addData("NoTargetFrames", vision.getStatus().getConsecutiveNoTargetFrames());
-            if (tagData != null && tagData.isAcquired) {
-                telemetry.addData("BotPose (m)", String.format("x=%.2f  y=%.2f  z=%.2f", tagData.xPosition, tagData.yPosition, tagData.zPosition));
-                try {
-                    packet.fieldOverlay().strokeCircle(tagData.xPosition, tagData.yPosition, 0.05);
-                } catch (Exception ignored) { }
-            } else {
-                telemetry.addLine("AprilTag: no valid target");
-            }
 
             if(intakeArtifact.newPress()){
                 intakeAction.clearCancel();
@@ -355,12 +362,18 @@ public class Drive_OpMode extends LinearOpMode {
             telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpindexerPos());
 
 
-//            if(selectValUp.newPress()){
-//                pidfSel = pidfSel.next();
-//            }
-//            if(selectValDown.newPress()){
-//                pidfSel = pidfSel.prev();
-//            }
+            if(valUp.newPress()){
+                hoodPos = clip(hoodPos + hoodInc,-1, 1);
+                m_robot.shooter.setHood(hoodPos);
+            }
+            if(valDown.newPress()){
+                hoodPos = clip(hoodPos - hoodInc,-1, 1);
+                m_robot.shooter.setHood(hoodPos);
+            }
+
+            telemetry.addData("Hood Pos", hoodPos);
+
+
 //            telemetry.addData("Modifying ", pidfSel.name());
 //
 //            if(valUp.newPress()){

@@ -356,10 +356,10 @@ public class Spindexer {
 
     public PIDFCoefficients showPIDFVals(){
         PIDFCoefficients pidfCoefficients = rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        telemetry.addData("P = ", pidfCoefficients.p);
-        telemetry.addData("I = ", pidfCoefficients.i);
-        telemetry.addData("D = ", pidfCoefficients.d);
-        telemetry.addData("F = ", pidfCoefficients.f);
+//        telemetry.addData("P = ", pidfCoefficients.p);
+//        telemetry.addData("I = ", pidfCoefficients.i);
+//        telemetry.addData("D = ", pidfCoefficients.d);
+//        telemetry.addData("F = ", pidfCoefficients.f);
         return pidfCoefficients;
     }
     public void setPIDF(PIDFCoefficients pidf){

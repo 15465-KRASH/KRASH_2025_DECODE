@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -19,6 +20,7 @@ public class Robot {
     public Shooter shooter;
     public Intake intake;
     public Spindexer spindexer;
+    public Limelight3A limelight;
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
         this.hardwareMap = hardwareMap;
@@ -29,8 +31,7 @@ public class Robot {
         shooter = new Shooter(hardwareMap, telemetry);
         intake = new Intake(hardwareMap, telemetry);
         spindexer = new Spindexer(hardwareMap, telemetry);
-
-
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
     }
 
 
