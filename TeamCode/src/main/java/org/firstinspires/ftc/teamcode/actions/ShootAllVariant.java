@@ -198,6 +198,16 @@ public class ShootAllVariant implements Action {
         return shotOrder[shotNum-1];
     }
 
+    public void setShotOrder(int greenPos){
+        for(int x =0; x <=2; x++){
+            if(x==greenPos){
+                shotOrder[x] = Spindexer.DetectedColor.GREEN;
+            } else {
+                shotOrder[x] = Spindexer.DetectedColor.PURPLE;
+            }
+        }
+    }
+
     public final void sleep(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
