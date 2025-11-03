@@ -46,16 +46,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
-import org.firstinspires.ftc.teamcode.actions.ShootAll;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
-import org.firstinspires.ftc.teamcode.classes.vision.LimelightVision;
-import org.firstinspires.ftc.teamcode.classes.vision.Vision;
-import com.qualcomm.robotcore.util.Range;
 
 
 import java.util.ArrayList;
@@ -120,7 +114,7 @@ public class Drive_OpMode extends LinearOpMode {
         double hoodInc = 0.05;
 
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
+        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 

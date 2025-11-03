@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
@@ -13,13 +14,18 @@ public class IntakeArtifact implements Action {
     private boolean running = true;
     private boolean canceled = false;
     private int targetSlot = -1;
+    private boolean isAuto = false;
+
+    private double autoTimeout = 5.0;
+    private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     private Intake intake;
     private Spindexer spindexer;
 
-    public IntakeArtifact(Intake intake, Spindexer spindexer){
+    public IntakeArtifact(Intake intake, Spindexer spindexer, boolean isAuto){
         this.intake = intake;
         this.spindexer = spindexer;
+        this.isAuto = isAuto;
     }
 
     @Override
@@ -28,10 +34,11 @@ public class IntakeArtifact implements Action {
             if (!initialized) {
                 targetSlot = spindexer.gotoClosestEmptyIntake();
             }
-            if (!initialized && targetSlot != -1) {
+            if ((!initialized && targetSlot != -1) || (timer.seconds() >= autoTimeout && isAuto)) {
                 intake.intakeArtifact();
                 initialized = true;
                 running = true;
+                timer.reset();
             } else if (targetSlot == -1) {
                 intake.stop();
                 running = false;

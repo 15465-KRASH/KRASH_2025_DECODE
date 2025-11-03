@@ -39,6 +39,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
 import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.MinVelConstraint;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Pose2dDual;
 import com.acmerobotics.roadrunner.PosePath;
@@ -119,6 +120,9 @@ public class Test_Red_Far extends LinearOpMode {
         Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160));
         Pose2d startPickup = new Pose2d(new Vector2d(35, 17), Math.toRadians(90));
         Pose2d finishPickup = new Pose2d(new Vector2d(35, 36), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 17), Math.toRadians(90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 36), Math.toRadians(90));
+        Pose2d finalPos = new Pose2d(new Vector2d(52, 21), Math.toRadians(160));
 
         VelConstraint pickupVelConstraint = new MinVelConstraint(Arrays.asList(
                 new TranslationalVelConstraint(50.0),
@@ -131,7 +135,7 @@ public class Test_Red_Far extends LinearOpMode {
         m_robot.limelight.pipelineSwitch(0);
         m_robot.limelight.start();
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
+        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, true);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
@@ -147,6 +151,31 @@ public class Test_Red_Far extends LinearOpMode {
                 .lineToY(finishPickup.position.y, new TranslationalVelConstraint(10));
 
         Action pickupFirstAction = pickupFirst.build();
+
+        TrajectoryActionBuilder shootSecondTraj = pickupFirst.endTrajectory().fresh()
+                .setTangent(Math.toRadians(-90))
+                .splineToLinearHeading(firstShot, Math.toRadians(160) - Math.toRadians(180));
+
+        Action shootSecondAction = shootSecondTraj.build();
+
+        TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
+                .setTangent(Math.toRadians(180))
+                .splineToLinearHeading(start2ndPickup, Math.toRadians(90))
+                .lineToY(finish2ndPickup.position.y, new TranslationalVelConstraint(10));
+
+        Action pickupSecondAction = pickupSecond.build();
+
+        TrajectoryActionBuilder shootThirdTraj = pickupSecond.endTrajectory().fresh()
+                .setTangent(Math.toRadians(-90))
+                .splineToLinearHeading(firstShot, Math.toRadians(160) - Math.toRadians(180));
+
+        Action shootThirdAction = shootThirdTraj.build();
+
+        TrajectoryActionBuilder finalPosTraj = shootThirdTraj.endTrajectory().fresh()
+                .setTangent(Math.toRadians(160))
+                .splineTo(finalPos.position, Math.toRadians(160));
+
+        Action finalPosAction = shootThirdTraj.build();
 
 
         // Wait for the game to start (driver presses START)
@@ -191,14 +220,27 @@ public class Test_Red_Far extends LinearOpMode {
         Actions.runBlocking(firstShotAction);
         Actions.runBlocking(shootAction);
 
-        intakeAction.preview(packet.fieldOverlay());
-        pickupFirstAction.preview(packet.fieldOverlay());
-        while(intakeAction.run(packet) || pickupFirstAction.run(packet)){
-            intakeAction.preview(packet.fieldOverlay());
-            pickupFirstAction.preview(packet.fieldOverlay());
-        }
+        Actions.runBlocking(new ParallelAction(
+                intakeAction,
+                pickupFirstAction
+        ));
 
+        m_robot.shooter.spinUp();
 
+        Actions.runBlocking(shootSecondAction);
+        Actions.runBlocking(shootAction);
+
+        Actions.runBlocking(new ParallelAction(
+                intakeAction,
+                pickupSecondAction
+        ));
+
+        m_robot.shooter.spinUp();
+
+        Actions.runBlocking(shootThirdAction);
+        Actions.runBlocking(shootAction);
+
+        Actions.runBlocking(finalPosAction);
 
     }
 

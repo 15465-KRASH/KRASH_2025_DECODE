@@ -27,13 +27,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.auton;
-
-import static com.qualcomm.robotcore.util.Range.clip;
+package org.firstinspires.ftc.teamcode.tuning;
 
 import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -41,11 +40,14 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
+import org.firstinspires.ftc.teamcode.classes.ButtonState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,10 +65,10 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-
-@Autonomous(name = "Base Auto", group = "Test")
+@Config
+@TeleOp(name = "Shooter PIDF", group = "Tuning")
 //@Disabled
-public class Base_Auto extends LinearOpMode {
+public class Shooter_PIDF extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -85,6 +87,11 @@ public class Base_Auto extends LinearOpMode {
         }
     }
 
+    public int targetRPM = 3000;
+    public double p = 0;
+    public double i = 0;
+    public double d = 0;
+    public double f = 0;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -95,13 +102,11 @@ public class Base_Auto extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0, 0, 0));
 
-        telemetry.setMsTransmissionInterval(11);
-        m_robot.limelight.pipelineSwitch(0);
-        m_robot.limelight.start();
+        ButtonState spinUp = new ButtonState(gamepad1, ButtonState.Button.right_bumper);
+        ButtonState spinDown = new ButtonState(gamepad1, ButtonState.Button.left_bumper);
+        ButtonState setVals = new ButtonState(gamepad1, ButtonState.Button.a);
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, true);
-        ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
-        ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
+        PIDFCoefficients pidf = new PIDFCoefficients();
 
         int tagID = 0;
 
@@ -115,40 +120,34 @@ public class Base_Auto extends LinearOpMode {
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
 
-        while (!isStarted() && !isStopRequested()) {
-            llResult = m_robot.limelight.getLatestResult();
-            if (llResult != null) {
-                if (llResult.isValid()) {
-                    // Access AprilTag results
-                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                        telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                        telemetry.update();
-                    }
-                }
+
+        waitForStart();
+
+        while(opModeIsActive()){
+            pidf = new PIDFCoefficients(p, i, d, f);
+
+            if(spinUp.newPress()){
+                m_robot.shooter.setTargetSpeed(targetRPM);
+                m_robot.shooter.spinUp();
             }
-        }
-
-        llResult = m_robot.limelight.getLatestResult();
-        if (llResult != null) {
-            if (llResult.isValid()) {
-                // Access AprilTag results
-                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
-                        tagID = fr.getFiducialId();
-                    }
-                }
+            if(spinDown.newPress()){
+                m_robot.shooter.idle();
             }
+            if(setVals.newPress()){
+                m_robot.shooter.setPIDF(pidf);
+            }
+
+            telemetry.addData("Setpoint:", targetRPM);
+            telemetry.addData("Velocity:", 60 * m_robot.shooter.getSpeed() / m_robot.shooter.ticksPerRev);
+            telemetry.addData("P:", p);
+            telemetry.addData("I:", i);
+            telemetry.addData("D:", d);
+            telemetry.addData("F:", f);
+            telemetry.update();
+
         }
 
-        shootAction.setShotOrder(tagID - 21);
-        shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
 
-        shootAction.preview(packet.fieldOverlay());
-        while (shootAction.run(packet)) {
-            shootAction.preview(packet.fieldOverlay());
-        }
 
     }
 
