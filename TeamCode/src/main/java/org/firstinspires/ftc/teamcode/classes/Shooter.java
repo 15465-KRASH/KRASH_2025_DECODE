@@ -156,4 +156,9 @@ public class Shooter {
         flywheel.setVelocityPIDFCoefficients(pidf.p, pidf.i, pidf.d, pidf.f);
     }
 
+    public void setPIDFExCoeeficients(PIDCoefficientsEx pidExCoeff, FeedforwardCoefficients ffCoeff){
+        motorController = new PIDEx(pidExCoeff);
+        motorFFController = new BasicFeedforward(ffCoeff);
+    }
+
 }

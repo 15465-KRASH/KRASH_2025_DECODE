@@ -31,18 +31,13 @@ package org.firstinspires.ftc.teamcode.auton;
 
 import android.annotation.SuppressLint;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.PosePath;
 import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
@@ -78,9 +73,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Test_Red_Far", group = "Test")
+@Autonomous(name = "Red_Close", group = "Comp")
 //@Disabled
-public class Test_Red_Far extends LinearOpMode {
+public class Red_Close extends LinearOpMode {
 
     enum PIDFVals {
         P,
