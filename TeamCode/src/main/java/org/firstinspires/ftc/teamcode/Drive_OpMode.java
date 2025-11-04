@@ -213,13 +213,14 @@ public class Drive_OpMode extends LinearOpMode {
 
             double rotation = Math.pow(-gamepad1.right_stick_x, 3) * powerScale;
 
+            if (alignToGoal.getCurrentPress() && llResult.isValid()) {
+                double offset = m_robot.getAprilTagOffset();
+                rotation = -0.5 * offset;
+            }
+
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
-
-            if (alignToGoal.getCurrentPress()) {
-
-            }
 
             if(intakeArtifact.newPress()){
                 intakeAction.clearCancel();

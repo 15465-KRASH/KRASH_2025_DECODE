@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -37,17 +38,21 @@ public class Robot {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
     }
 
-    public double checkAprilTag () {
-        llResult = m_robot.limelight.getLatestResult();
+    public double getAprilTagOffset () {
+        LLResult llResult;
+        llResult = limelight.getLatestResult();
         if (llResult != null) {
             if (llResult.isValid()) {
                 // Access AprilTag results
                 List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
                 for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    if (fr.getFiducialId() == 20 || fr.getFiducialId() == 24) {
+                        return fr.getTargetXDegrees();
+                    }
                 }
             }
         }
+        return 0;
     }
 
 
