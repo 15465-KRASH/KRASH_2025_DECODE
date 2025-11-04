@@ -16,7 +16,7 @@ public class IntakeArtifact implements Action {
     private int targetSlot = -1;
     private boolean isAuto = false;
 
-    private double autoTimeout = 5.0;
+    private double autoTimeout = 6.0;
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     private Intake intake;
@@ -34,12 +34,17 @@ public class IntakeArtifact implements Action {
             if (!initialized) {
                 targetSlot = spindexer.gotoClosestEmptyIntake();
             }
-            if ((!initialized && targetSlot != -1) || (timer.seconds() >= autoTimeout && isAuto)) {
+            if ((!initialized && targetSlot != -1)) {
                 intake.intakeArtifact();
                 initialized = true;
                 running = true;
                 timer.reset();
             } else if (targetSlot == -1) {
+                intake.stop();
+                running = false;
+            }
+
+            if(timer.seconds() >= autoTimeout && isAuto){
                 intake.stop();
                 running = false;
             }
@@ -55,6 +60,9 @@ public class IntakeArtifact implements Action {
                         running = false;
                     }
                 }
+            }
+            if(!running){
+                cleanup();
             }
             return running;
         } else {

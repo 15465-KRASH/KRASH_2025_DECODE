@@ -113,6 +113,8 @@ public class Drive_OpMode extends LinearOpMode {
         double hoodPos = 0;
         double hoodInc = 0.05;
 
+        boolean fieldRel = false;
+
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
@@ -211,11 +213,20 @@ public class Drive_OpMode extends LinearOpMode {
                     Math.pow(-gamepad1.left_stick_y, 3) * powerScale,
                     Math.pow(-gamepad1.left_stick_x, 3) * powerScale);
 
+            m_robot.drive.localizer.update();
+
+            if(fieldRel){
+                input = m_robot.rotatedVector(input, m_robot.drive.localizer.getPose().heading.toDouble());
+            }
+
+            telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
+
+
             double rotation = Math.pow(-gamepad1.right_stick_x, 3) * powerScale;
 
-            if (alignToGoal.getCurrentPress() && llResult.isValid()) {
+            if (alignToGoal.getCurrentPress() && llResult != null) {
                 double offset = m_robot.getAprilTagOffset();
-                rotation = -0.5 * offset;
+                rotation = -0.03 * offset;
             }
 
             driveControl = new PoseVelocity2d(input, rotation);

@@ -87,11 +87,11 @@ public class Shooter_PIDF extends LinearOpMode {
         }
     }
 
-    public int targetRPM = 3000;
-    public double p = 0;
-    public double i = 0;
-    public double d = 0;
-    public double f = 0;
+    public static int targetRPM = 3000;
+    public static double p = 0;
+    public static double i = 0;
+    public static double d = 0;
+    public static double f = 0;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -107,6 +107,8 @@ public class Shooter_PIDF extends LinearOpMode {
         ButtonState setVals = new ButtonState(gamepad1, ButtonState.Button.a);
 
         PIDFCoefficients pidf = new PIDFCoefficients();
+        pidf = new PIDFCoefficients(p, i, d, f);
+        m_robot.shooter.setPIDF(pidf);
 
         int tagID = 0;
 
@@ -125,6 +127,7 @@ public class Shooter_PIDF extends LinearOpMode {
 
         while(opModeIsActive()){
             pidf = new PIDFCoefficients(p, i, d, f);
+            PIDFCoefficients pidfRead = m_robot.shooter.showPIDFVals();
 
             if(spinUp.newPress()){
                 m_robot.shooter.setTargetSpeed(targetRPM);
@@ -139,10 +142,10 @@ public class Shooter_PIDF extends LinearOpMode {
 
             telemetry.addData("Setpoint:", targetRPM);
             telemetry.addData("Velocity:", 60 * m_robot.shooter.getSpeed() / m_robot.shooter.ticksPerRev);
-            telemetry.addData("P:", p);
-            telemetry.addData("I:", i);
-            telemetry.addData("D:", d);
-            telemetry.addData("F:", f);
+            telemetry.addData("P:", pidfRead.p);
+            telemetry.addData("I:", pidfRead.i);
+            telemetry.addData("D:", pidfRead.d);
+            telemetry.addData("F:", pidfRead.f);
             telemetry.update();
 
         }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -25,6 +26,7 @@ public class Robot {
     public Intake intake;
     public Spindexer spindexer;
     public Limelight3A limelight;
+
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
         this.hardwareMap = hardwareMap;
@@ -55,5 +57,29 @@ public class Robot {
         return 0;
     }
 
+    public double getTurnToTargetRotation() {
+        LLResult llResult;
+        llResult = limelight.getLatestResult();
+        if (llResult != null) {
+            if (llResult.isValid()) {
+                // Access AprilTag results
+                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    if (fr.getFiducialId() == 20 || fr.getFiducialId() == 24) {
+                        return fr.getTargetXDegrees();
+                    }
+                }
+            }
+        }
+        return 0;
+    }
 
+
+    public Vector2d rotatedVector(Vector2d myVector, double angleDegrees){
+        // For reference, this is what rotateBy() does internally
+        double angleRadians = Math.toRadians(angleDegrees);
+        double x_rotated = myVector.x * Math.cos(angleRadians) - myVector.y * Math.sin(angleRadians);
+        double y_rotated = myVector.x * Math.sin(angleRadians) + myVector.y * Math.cos(angleRadians);
+        return new Vector2d(x_rotated, y_rotated);
+    }
 }

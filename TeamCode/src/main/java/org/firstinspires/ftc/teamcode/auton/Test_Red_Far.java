@@ -118,10 +118,10 @@ public class Test_Red_Far extends LinearOpMode {
         HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
         Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160));
-        Pose2d startPickup = new Pose2d(new Vector2d(35, 17), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(35, 36), Math.toRadians(90));
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 17), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 36), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(35, 19), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(35, 42), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 42), Math.toRadians(90));
         Pose2d finalPos = new Pose2d(new Vector2d(52, 21), Math.toRadians(160));
 
         VelConstraint pickupVelConstraint = new MinVelConstraint(Arrays.asList(
@@ -147,8 +147,8 @@ public class Test_Red_Far extends LinearOpMode {
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(startPickup, Math.toRadians(90))
-                .lineToY(finishPickup.position.y, new TranslationalVelConstraint(10));
+                .splineToSplineHeading(startPickup, Math.toRadians(90))
+                .splineToSplineHeading(finishPickup, Math.toRadians(90), new TranslationalVelConstraint(7));
 
         Action pickupFirstAction = pickupFirst.build();
 
@@ -160,8 +160,8 @@ public class Test_Red_Far extends LinearOpMode {
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(start2ndPickup, Math.toRadians(90))
-                .lineToY(finish2ndPickup.position.y, new TranslationalVelConstraint(10));
+                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
+                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), new TranslationalVelConstraint(7));
 
         Action pickupSecondAction = pickupSecond.build();
 
@@ -173,9 +173,9 @@ public class Test_Red_Far extends LinearOpMode {
 
         TrajectoryActionBuilder finalPosTraj = shootThirdTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(160))
-                .splineTo(finalPos.position, Math.toRadians(160));
+                .splineToLinearHeading(finalPos, Math.toRadians(160));
 
-        Action finalPosAction = shootThirdTraj.build();
+        Action finalPosAction = finalPosTraj.build();
 
 
         // Wait for the game to start (driver presses START)
@@ -217,23 +217,58 @@ public class Test_Red_Far extends LinearOpMode {
         shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
 
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+        }
+        telemetry.update();
+
         Actions.runBlocking(firstShotAction);
         Actions.runBlocking(shootAction);
+
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+        }
+        telemetry.update();
 
         Actions.runBlocking(new ParallelAction(
                 intakeAction,
                 pickupFirstAction
         ));
 
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+        }
+        telemetry.update();
+
         m_robot.shooter.spinUp();
 
         Actions.runBlocking(shootSecondAction);
         Actions.runBlocking(shootAction);
 
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+        }
+        telemetry.update();
+
         Actions.runBlocking(new ParallelAction(
                 intakeAction,
                 pickupSecondAction
         ));
+
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+        }
+        telemetry.update();
 
         m_robot.shooter.spinUp();
 

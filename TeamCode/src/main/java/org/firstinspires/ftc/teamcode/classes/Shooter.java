@@ -44,6 +44,7 @@ public class Shooter {
         flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         loader = hardwareMap.get(CRServo.class, "loader");
+        loader.setDirection(DcMotorSimple.Direction.REVERSE);
         hood = hardwareMap.get(Servo.class, "hood");
         hood.setDirection(Servo.Direction.REVERSE);
 
