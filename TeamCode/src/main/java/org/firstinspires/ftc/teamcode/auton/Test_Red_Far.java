@@ -43,6 +43,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Pose2dDual;
 import com.acmerobotics.roadrunner.PosePath;
+import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -108,6 +109,7 @@ public class Test_Red_Far extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
 
         int tagID = 0;
+        int shooterRPM = 3250;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -216,6 +218,8 @@ public class Test_Red_Far extends LinearOpMode {
 
         shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
+        m_robot.shooter.setTargetSpeed(shooterRPM);
+        m_robot.shooter.updateController();
 
         for(int x = 0; x <=2; x++){
             telemetry.addLine()
@@ -224,7 +228,9 @@ public class Test_Red_Far extends LinearOpMode {
         }
         telemetry.update();
 
-        Actions.runBlocking(firstShotAction);
+        Actions.runBlocking(new RaceAction(
+                firstShotAction,
+                m_robot.shooter.updateFlywheel()));
         Actions.runBlocking(shootAction);
 
         for(int x = 0; x <=2; x++){
@@ -246,9 +252,12 @@ public class Test_Red_Far extends LinearOpMode {
         }
         telemetry.update();
 
-        m_robot.shooter.spinUp();
+        m_robot.shooter.setTargetSpeed(shooterRPM);
+        m_robot.shooter.updateController();
 
-        Actions.runBlocking(shootSecondAction);
+        Actions.runBlocking(new RaceAction(
+                shootSecondAction,
+                m_robot.shooter.updateFlywheel()));
         Actions.runBlocking(shootAction);
 
         for(int x = 0; x <=2; x++){
@@ -270,9 +279,12 @@ public class Test_Red_Far extends LinearOpMode {
         }
         telemetry.update();
 
-        m_robot.shooter.spinUp();
+        m_robot.shooter.setTargetSpeed(shooterRPM);
+        m_robot.shooter.updateController();
 
-        Actions.runBlocking(shootThirdAction);
+        Actions.runBlocking(new RaceAction(
+                shootThirdAction,
+                m_robot.shooter.updateFlywheel()));
         Actions.runBlocking(shootAction);
 
         Actions.runBlocking(finalPosAction);

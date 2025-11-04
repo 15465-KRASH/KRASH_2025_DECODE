@@ -1,5 +1,13 @@
 package org.firstinspires.ftc.teamcode.classes;
 
+import androidx.annotation.NonNull;
+
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.PIDEx;
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
+import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
+import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -7,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -19,12 +28,28 @@ public class Shooter {
     public Servo hood; //Control Hub Servo Port 5
     PIDFCoefficients pidfCoefficients;
 
+    //PIDEx Setup
+    static double Kp = 0;
+    static double Ki = 0;
+    static double Kd = 0;
+    static double Kv = 0; //1.1;
+    static double Ka = 0; //0.2;
+    static double Ks = 0; //0.001;
+    static double targetAccelTime = 0.5; //seconds
+
+    PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
+    PIDEx motorController = new PIDEx(pidExCoeff);
+
+    FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
+    BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
+
     public static final int ticksPerRev = 28;
     public int targetRPM = 3250;
     public int targetRPS = targetRPM / 60;
     public int targetSpeed = targetRPS * ticksPerRev;
     public int idleSpeed = 1000 / 60 / ticksPerRev;
     public double speedTol = 2 / 100.0; //Percent
+    private static int reference = 1517; // targetSpeed (ticks/sec) for 3250 RPM
 
     public double hoodMin = 0;
     public double hoodMax = 0;
@@ -51,6 +76,26 @@ public class Shooter {
         hood.setPosition(0);
     }
 
+    public void updateController(){
+        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double currentSpeed = flywheel.getVelocity();
+        double targetAccel = (targetSpeed - currentSpeed) / targetAccelTime;
+        double pidOutput = motorController.calculate(targetSpeed, currentSpeed);
+        double ffOutput = motorFFController.calculate(0, targetSpeed, targetAccel);
+        flywheel.setPower(Range.clip(pidOutput + ffOutput, -1.0, 1.0));
+    }
+    public Action updateFlywheel() {
+        return new Action() {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                updateController();
+                return true;
+            }
+        };
+    }
+
     public void shoot() {
         flywheel.setPower(0.5);
     }
@@ -64,16 +109,17 @@ public class Shooter {
     }
 
     public void setTargetSpeed(int rpm){
-        targetRPM = 3250;
+        targetRPM = rpm;
         targetRPS = targetRPM / 60;
         targetSpeed = targetRPS * ticksPerRev;
     }
 
-    public void spinUp() {
-        flywheel.setVelocity(targetSpeed);
+    public void spinUp(int target) {
+        setTargetSpeed(target);
     }
 
     public void idle() {
+        targetRPM = 0;
         flywheel.setPower(0);
         //Uncomment below to keep idling instead of stopping
         //flywheel.setVelocity(idleSpeed);

@@ -189,6 +189,8 @@ public class Drive_OpMode extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            m_robot.shooter.updateController();
+
 
             //m_robot.limelight.updateRobotOrientation(m_robot.drive.localizer.)
             llResult = m_robot.limelight.getLatestResult();
@@ -271,7 +273,7 @@ public class Drive_OpMode extends LinearOpMode {
             }
 
             if(spinUp.newPress()){
-                m_robot.shooter.spinUp();
+                m_robot.shooter.spinUp(m_robot.shooter.targetRPM);
             } else if (spinUp.newRelease()){
                 if(!shootAction.isRunning()){
                     m_robot.shooter.idle();
