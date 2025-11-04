@@ -156,7 +156,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
         ButtonState readColors = new ButtonState(gamepad2, ButtonState.Button.start);
 
-
+        ButtonState alignToGoal = new ButtonState(gamepad1, ButtonState.Button.left_trigger);
 
         int shooterPos = 0;
 
@@ -219,6 +219,10 @@ public class Drive_OpMode extends LinearOpMode {
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
+
+            if (alignToGoal.getCurrentPress()) {
+
+            }
 
             if(intakeArtifact.newPress()){
                 intakeAction.clearCancel();
