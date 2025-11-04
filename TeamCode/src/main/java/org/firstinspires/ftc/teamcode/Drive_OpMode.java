@@ -46,15 +46,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
-import org.firstinspires.ftc.teamcode.actions.ShootAll;
+import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
-import org.firstinspires.ftc.teamcode.classes.vision.LimelightVision;
-import org.firstinspires.ftc.teamcode.classes.vision.Vision;
-import com.qualcomm.robotcore.util.Range;
 
 
 import java.util.ArrayList;
@@ -119,8 +114,9 @@ public class Drive_OpMode extends LinearOpMode {
         double hoodInc = 0.05;
 
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer);
+        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
+        ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
         //PIDFVals pidfSel = PIDFVals.P;
 
@@ -132,6 +128,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState shootGreen = new ButtonState(gamepad2, ButtonState.Button.left_stick_button);
         ButtonState shootPurple = new ButtonState(gamepad2, ButtonState.Button.right_stick_button);
         ButtonState shootAny = new ButtonState(gamepad2, ButtonState.Button.left_bumper);
+        ButtonState scanIntake =new ButtonState(gamepad2, ButtonState.Button.back);
 
 //        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
 //        ButtonState leftMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -207,7 +204,7 @@ public class Drive_OpMode extends LinearOpMode {
             if (gamepad1.right_bumper) {
                 powerScale=1;
             } else if (gamepad1.left_bumper) {
-                powerScale=.5;
+                powerScale=.3;
             }
 
             Vector2d input = new Vector2d(
@@ -229,6 +226,13 @@ public class Drive_OpMode extends LinearOpMode {
                 runningActions.add(intakeAction);
             } else if (intakeArtifact.newRelease()){
                 intakeAction.cancel();
+            }
+
+            if(scanIntake.newPress()){
+                scanAction.clearCancel();
+                runningActions.add(scanAction);
+            } else if (scanIntake.newRelease()){
+                scanAction.cancel();
             }
 
             if(stopIntake.newPress()){

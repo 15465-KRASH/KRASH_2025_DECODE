@@ -9,56 +9,58 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
-public class IntakeArtifact implements Action {
+public class ScanIntake implements Action {
     private boolean initialized = false;
     private boolean running = true;
+    private boolean waiting = false;
     private boolean canceled = false;
-    private int targetSlot = -1;
-    private boolean isAuto = false;
+    private int targetSlot = 0;
 
-    private double autoTimeout = 5.0;
+    private double holdTime = 0.5;
+
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
-    private Intake intake;
     private Spindexer spindexer;
 
-    public IntakeArtifact(Intake intake, Spindexer spindexer, boolean isAuto){
-        this.intake = intake;
+    public ScanIntake(Spindexer spindexer){
         this.spindexer = spindexer;
-        this.isAuto = isAuto;
     }
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
         if (!canceled) {
             if (!initialized) {
-                targetSlot = spindexer.gotoClosestEmptyIntake();
-            }
-            if ((!initialized && targetSlot != -1) || (timer.seconds() >= autoTimeout && isAuto)) {
-                intake.intakeArtifact();
+                targetSlot = 0;
+                spindexer.moveToIntakePos(0);
                 initialized = true;
                 running = true;
+                waiting = true;
                 timer.reset();
-            } else if (targetSlot == -1) {
-                intake.stop();
-                running = false;
             }
 
-            if (running) {
-                if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
+            waiting = timer.seconds() < holdTime;
+
+            if (running & spindexer.spindexerAtTarget() && !waiting) {
+                if(spindexer.isIntakeSlotFull()){
                     spindexer.setSlot(targetSlot, spindexer.getIntakeColor());
-                    targetSlot = spindexer.gotoClosestEmptyIntake();
-                    if (targetSlot != -1) {
-                        intake.intakeArtifact();
-                    } else {
-                        intake.stop();
-                        running = false;
-                    }
+                } else {
+                    spindexer.setSlot(targetSlot, Spindexer.DetectedColor.NONE);
+                }
+
+                if(targetSlot < 2){
+                    targetSlot ++;
+                    spindexer.moveToIntakePos(targetSlot);
+                    timer.reset();
+                    waiting = true;
+                } else {
+                    running = false;
+                    initialized = false;
                 }
             }
             return running;
         } else {
             canceled = false;
+            initialized = false;
             return false;
         }
 //        packet.put("shooterVelocity", vel);
@@ -67,13 +69,6 @@ public class IntakeArtifact implements Action {
 
     public void cancel(){
         canceled = true;
-        cleanup();
-    }
-
-    public void cleanup(){
-        running = false;
-        intake.stop();
-        initialized = false;
     }
 
     public void clearCancel(){

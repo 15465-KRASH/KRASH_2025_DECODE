@@ -19,8 +19,8 @@ public class Shooter {
     public Servo hood; //Control Hub Servo Port 5
     PIDFCoefficients pidfCoefficients;
 
-    private static final int ticksPerRev = 28;
-    public int targetRPM = 2500;
+    public static final int ticksPerRev = 28;
+    public int targetRPM = 3250;
     public int targetRPS = targetRPM / 60;
     public int targetSpeed = targetRPS * ticksPerRev;
     public int idleSpeed = 1000 / 60 / ticksPerRev;
@@ -60,6 +60,12 @@ public class Shooter {
 
     public void loadArtifact(double pwr) {
         loader.setPower(pwr);
+    }
+
+    public void setTargetSpeed(int rpm){
+        targetRPM = 3250;
+        targetRPS = targetRPM / 60;
+        targetSpeed = targetRPS * ticksPerRev;
     }
 
     public void spinUp() {
