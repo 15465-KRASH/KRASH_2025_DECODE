@@ -144,10 +144,10 @@ public class Drive_OpMode extends LinearOpMode {
 //
 //        ButtonState selectValUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
 //        ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
-        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
-        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
-        ButtonState spinPwrUp = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
-        ButtonState spinPwrDwn = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
+//        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
+//        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
+//        ButtonState spinPwrUp = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
+//        ButtonState spinPwrDwn = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
 //
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
         ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -156,6 +156,11 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState readColors = new ButtonState(gamepad2, ButtonState.Button.start);
 
         ButtonState alignToGoal = new ButtonState(gamepad1, ButtonState.Button.left_trigger);
+        ButtonState runLift = new ButtonState(gamepad1, ButtonState.Button.a);
+        ButtonState setRoboRel = new ButtonState(gamepad1, ButtonState.Button.x);
+        ButtonState setFieldRel = new ButtonState(gamepad1, ButtonState.Button.b);
+        ButtonState resetFieldRel = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
+
 
         int shooterPos = 0;
 
@@ -217,6 +222,16 @@ public class Drive_OpMode extends LinearOpMode {
 
             if(fieldRel){
                 input = m_robot.rotatedVector(input, m_robot.drive.localizer.getPose().heading.toDouble());
+            }
+
+            if(setRoboRel.newPress()){
+                fieldRel =false;
+            } else if (setFieldRel.newPress()){
+                fieldRel = true;
+            }
+            if(resetFieldRel.getCurrentPress()){
+                Pose2d currentPose = m_robot.drive.localizer.getPose();
+                m_robot.drive.localizer.setPose(new Pose2d(currentPose.position, 0));
             }
 
             telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
@@ -318,6 +333,10 @@ public class Drive_OpMode extends LinearOpMode {
                 shootAction.cancel();
             }
 
+            if(runLift.getCurrentPress()){
+                m_robot.lift.manualClimb(0.5);
+            }
+
 
             /***
              * Test Buttons
@@ -402,14 +421,14 @@ public class Drive_OpMode extends LinearOpMode {
             telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpindexerPos());
 
 
-            if(valUp.newPress()){
-                hoodPos = clip(hoodPos + hoodInc,-1, 1);
-                m_robot.shooter.setHood(hoodPos);
-            }
-            if(valDown.newPress()){
-                hoodPos = clip(hoodPos - hoodInc,-1, 1);
-                m_robot.shooter.setHood(hoodPos);
-            }
+//            if(valUp.newPress()){
+//                hoodPos = clip(hoodPos + hoodInc,-1, 1);
+//                m_robot.shooter.setHood(hoodPos);
+//            }
+//            if(valDown.newPress()){
+//                hoodPos = clip(hoodPos - hoodInc,-1, 1);
+//                m_robot.shooter.setHood(hoodPos);
+//            }
 
             telemetry.addData("Hood Pos", hoodPos);
 
