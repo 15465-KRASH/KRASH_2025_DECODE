@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.tuning;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
@@ -21,6 +23,8 @@ public class ColorSensorCalibration extends LinearOpMode {
         ButtonState readLeft = new ButtonState(gamepad1, ButtonState.Button.x);
         ButtonState readRight = new ButtonState(gamepad1, ButtonState.Button.b);
 
+        NormalizedRGBA colors;
+
         waitForStart();
 
         //spindexer.getDetectedColor(spindexer.intakeSensor, telemetry);
@@ -31,14 +35,26 @@ public class ColorSensorCalibration extends LinearOpMode {
             telemetry.addData("color detected: ", detectedColor);
 
             if(readIntake.getCurrentPress()) {
+                colors = spindexer.intakeSensor.getNormalizedColors();
                 detectedColor = spindexer.getDetectedColor(spindexer.intakeSensor, telemetry);
                 telemetry.addData("distance", spindexer.distanceIntakeSensor.getDistance(DistanceUnit.MM));
+                telemetry.addData("red: ", (colors.red / colors.alpha));
+                telemetry.addData("green: ", (colors.green / colors.alpha));
+                telemetry.addData("blue: ", (colors.blue / colors.alpha));
             }
             if(readLeft.getCurrentPress()) {
+                colors = spindexer.leftSensor.getNormalizedColors();
                 detectedColor = spindexer.getDetectedColor(spindexer.leftSensor, telemetry);
+                telemetry.addData("red: ", (colors.red / colors.alpha));
+                telemetry.addData("green: ", (colors.green / colors.alpha));
+                telemetry.addData("blue: ", (colors.blue / colors.alpha));
             }
             if(readRight.getCurrentPress()) {
+                colors = spindexer.rightSensor.getNormalizedColors();
                 detectedColor = spindexer.getDetectedColor(spindexer.rightSensor, telemetry);
+                telemetry.addData("red: ", (colors.red / colors.alpha));
+                telemetry.addData("green: ", (colors.green / colors.alpha));
+                telemetry.addData("blue: ", (colors.blue / colors.alpha));
             }
 
             telemetry.addData("Spindexer Pos", spindexer.getSpindexerPos());

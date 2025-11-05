@@ -37,7 +37,7 @@ public class Spindexer {
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 80;
+    public double intakeDistLimit = 100;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -118,9 +118,9 @@ public class Spindexer {
                 return DetectedColor.NONE;
             }
         } else if (sensor == intakeSensor) {
-            if (normRed > 0.9 && normGreen < 2.2 && normBlue > 1.7) {
+            if (normRed > 0.9 && normGreen < 2.5 && normBlue > 2.7) {
                 return DetectedColor.PURPLE;
-            } else if (normRed < 1.3 && normGreen > 1.8 && normBlue > 1.5) {
+            } else if (normRed < 1.3 && normGreen > 3.1 && normBlue > 2.6) {
                 return DetectedColor.GREEN;
             } else {
                 return DetectedColor.NONE;
