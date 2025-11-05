@@ -42,6 +42,8 @@ public class Spindexer {
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
 
+    int[] readCounter = new int[10];
+
     public enum DetectedColor {
         GREEN,
         PURPLE,
@@ -142,8 +144,6 @@ public class Spindexer {
     public DetectedColor getIntakeColor(){
         return getDetectedColor(intakeSensor, telemetry);
     }
-
-
 
     public void rotate(int pose) {
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
