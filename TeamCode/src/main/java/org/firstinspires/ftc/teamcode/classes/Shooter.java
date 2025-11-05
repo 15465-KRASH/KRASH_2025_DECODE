@@ -29,13 +29,13 @@ public class Shooter {
     PIDFCoefficients pidfCoefficients;
 
     //PIDEx Setup
-    static double Kp = 0;
-    static double Ki = 0;
-    static double Kd = 0;
-    static double Kv = 0; //1.1;
-    static double Ka = 0; //0.2;
-    static double Ks = 0; //0.001;
-    static double targetAccelTime = 0.5; //seconds
+    public static double Kp = 0.003;
+    public static double Ki = 0;
+    public static double Kd = 0.0002;
+    public static double Kv = 0.00043; //1.1;
+    public static double Ka = 0; //0.2;
+    public static double Ks = 0; //0.001;
+    public static double targetAccelTime = 0.5; //seconds
 
     PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
     PIDEx motorController = new PIDEx(pidExCoeff);
@@ -44,7 +44,7 @@ public class Shooter {
     BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
 
     public static final int ticksPerRev = 28;
-    public int targetRPM = 3250;
+    public int targetRPM = 0;
     public int targetRPS = targetRPM / 60;
     public int targetSpeed = targetRPS * ticksPerRev;
     public int idleSpeed = 1000 / 60 / ticksPerRev;
@@ -60,13 +60,13 @@ public class Shooter {
 
         flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
         flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
-        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        pidfCoefficients =  flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        pidfCoefficients.i = 0;
-        pidfCoefficients.d = 0.5;
-        pidfCoefficients.f = 2;
-        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+//        pidfCoefficients =  flywheel.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+//        pidfCoefficients.i = 0;
+//        pidfCoefficients.d = 0.5;
+//        pidfCoefficients.f = 2;
+//        flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         loader = hardwareMap.get(CRServo.class, "loader");
         loader.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -79,10 +79,20 @@ public class Shooter {
     public void updateController(){
         flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double currentSpeed = flywheel.getVelocity();
-        double targetAccel = (targetSpeed - currentSpeed) / targetAccelTime;
+        double targetAccel = (targetSpeed) / targetAccelTime;
         double pidOutput = motorController.calculate(targetSpeed, currentSpeed);
         double ffOutput = motorFFController.calculate(0, targetSpeed, targetAccel);
-        flywheel.setPower(Range.clip(pidOutput + ffOutput, -1.0, 1.0));
+        if (targetSpeed != 0) {
+            flywheel.setPower(Range.clip(pidOutput + ffOutput, -1.0, 1.0));
+        } else {
+            flywheel.setPower(0);
+        }
+
+        telemetry.addData("currentSpeed: ", currentSpeed);
+        telemetry.addData("targetSpeed: ", targetSpeed);
+        telemetry.addData("targetAccel: ", targetAccel);
+        telemetry.addData("pidOutput: ", pidOutput);
+        telemetry.addData("ffoutput: ", ffOutput);
     }
     public Action updateFlywheel() {
         return new Action() {
@@ -119,7 +129,7 @@ public class Shooter {
     }
 
     public void idle() {
-        targetRPM = 0;
+        setTargetSpeed(0);
         flywheel.setPower(0);
         //Uncomment below to keep idling instead of stopping
         //flywheel.setVelocity(idleSpeed);

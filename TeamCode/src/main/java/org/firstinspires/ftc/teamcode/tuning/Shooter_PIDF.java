@@ -131,7 +131,7 @@ public class Shooter_PIDF extends LinearOpMode {
 
             if(spinUp.newPress()){
                 m_robot.shooter.setTargetSpeed(targetRPM);
-                m_robot.shooter.spinUp();
+                m_robot.shooter.spinUp(targetRPM);
             }
             if(spinDown.newPress()){
                 m_robot.shooter.idle();

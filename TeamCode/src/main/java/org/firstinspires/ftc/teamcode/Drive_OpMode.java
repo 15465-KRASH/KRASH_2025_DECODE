@@ -100,15 +100,17 @@ public class Drive_OpMode extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0,0,0));
 
+        int shotRPM = 3250;
+
         telemetry.setMsTransmissionInterval(11);
         m_robot.limelight.pipelineSwitch(0);
         m_robot.limelight.start();
-
-        PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
-        pidf.p = 22;
-        pidf.i = 3;
-        pidf.d = 0;
-        pidf.f = 0;
+//
+//        PIDFCoefficients pidf = m_robot.shooter.showPIDFVals();
+//        pidf.p = 22;
+//        pidf.i = 3;
+//        pidf.d = 0;
+//        pidf.f = 0;
 
         double hoodPos = 0;
         double hoodInc = 0.05;
@@ -124,13 +126,18 @@ public class Drive_OpMode extends LinearOpMode {
 
 //        ButtonState liftTester =  new ButtonState(gamepad1, ButtonState.Button.a);
 //        ButtonState loaderTest = new ButtonState(gamepad1, ButtonState.Button.b);
-        ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.y);
+        ButtonState spinUp = new ButtonState(gamepad2, ButtonState.Button.right_bumper);
         ButtonState shootAll = new ButtonState(gamepad2, ButtonState.Button.right_trigger);
         ButtonState shootPattern = new ButtonState(gamepad2, ButtonState.Button.left_trigger);
         ButtonState shootGreen = new ButtonState(gamepad2, ButtonState.Button.left_stick_button);
         ButtonState shootPurple = new ButtonState(gamepad2, ButtonState.Button.right_stick_button);
         ButtonState shootAny = new ButtonState(gamepad2, ButtonState.Button.left_bumper);
         ButtonState scanIntake =new ButtonState(gamepad2, ButtonState.Button.back);
+
+        ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
+        ButtonState rotateSpindexer = new ButtonState(gamepad2, ButtonState.Button.x);
+        ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
+        ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
 
 //        ButtonState highRollerTest = new ButtonState(gamepad2, ButtonState.Button.y);
 //        ButtonState leftMidRollerTest = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -146,14 +153,8 @@ public class Drive_OpMode extends LinearOpMode {
 //        ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
         ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
         ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
-        ButtonState spinPwrUp = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
-        ButtonState spinPwrDwn = new ButtonState(gamepad2, ButtonState.Button.dpad_down);
 //
-        ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
-        ButtonState nextShooterPos = new ButtonState(gamepad2, ButtonState.Button.x);
-        ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
-        ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
-        ButtonState readColors = new ButtonState(gamepad2, ButtonState.Button.start);
+
 
         ButtonState alignToGoal = new ButtonState(gamepad1, ButtonState.Button.left_trigger);
 
@@ -261,19 +262,20 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.intake.stop();
             }
 
-            if(nextShooterPos.newPress()){
-                shooterPos ++;
-                if (shooterPos > 2) {shooterPos = 0;}
-                m_robot.spindexer.moveToShooterPos(shooterPos);
+            if(rotateSpindexer.getCurrentPress()){
+                m_robot.spindexer.manualSpindexer();
+            } else if (rotateSpindexer.newRelease()){
+                m_robot.spindexer.stop();
+                m_robot.spindexer.zeroSpindexer();
             }
 
-            if(readColors.getCurrentPress()) {
-                m_robot.spindexer.getSpindexerPos();
-
-            }
+//            if(readColors.getCurrentPress()) {
+//                m_robot.spindexer.getSpindexerPos();
+//
+//            }
 
             if(spinUp.newPress()){
-                m_robot.shooter.spinUp(m_robot.shooter.targetRPM);
+                m_robot.shooter.spinUp(shotRPM);
             } else if (spinUp.newRelease()){
                 if(!shootAction.isRunning()){
                     m_robot.shooter.idle();
@@ -282,6 +284,7 @@ public class Drive_OpMode extends LinearOpMode {
 
             if(shootAll.newPress()){
                 shootAction.clearCancel();
+                m_robot.shooter.setTargetSpeed(shotRPM);
                 shootAction.selectShot(ShootAllVariant.ShotType.ShootAll);
                 runningActions.add(shootAction);
             } else if (shootAll.newRelease()){
@@ -460,9 +463,6 @@ public class Drive_OpMode extends LinearOpMode {
 //                m_robot.spindexer.spinPwr = m_robot.spindexer.spinPwr -0.05;
 //                if(m_robot.spindexer.spinPwr < 0.0) {m_robot.spindexer.spinPwr = 1.00;
 //            }
-            m_robot.shooter.setPIDF(pidf);
-            telemetry.addData("Spin Power = ", m_robot.spindexer.spinPwr);
-            telemetry.addData("PIDF = ", m_robot.shooter.showPIDFVals());
 
             // update running actions
             List<Action> newActions = new ArrayList<>();

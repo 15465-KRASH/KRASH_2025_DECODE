@@ -37,6 +37,7 @@ import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -88,13 +89,13 @@ public class Shooter_PIDFEx extends LinearOpMode {
 
     public static int targetRPM = 3250;
     //PIDEx Setup
-    static double Kp = 0;
-    static double Ki = 0;
-    static double Kd = 0;
-    static double Kv = 0; //1.1;
-    static double Ka = 0; //0.2;
-    static double Ks = 0; //0.001;
-    static double targetAccelTime = 0.5; //seconds
+    public static double Kp = 0.003;
+    public static double Ki = 0;
+    public static double Kd = 0.0002;
+    public static double Kv = 0.00043; //1.1;
+    public static double Ka = 0; //0.2;
+    public static double Ks = 0; //0.001;
+    public static double targetAccelTime = 0.5; //seconds
 
 
 
@@ -105,11 +106,15 @@ public class Shooter_PIDFEx extends LinearOpMode {
         List<Action> runningActions = new ArrayList<>();
 
         TelemetryPacket packet = new TelemetryPacket();
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0, 0, 0));
 
         ButtonState spinUp = new ButtonState(gamepad1, ButtonState.Button.right_bumper);
         ButtonState spinDown = new ButtonState(gamepad1, ButtonState.Button.left_bumper);
         ButtonState setVals = new ButtonState(gamepad1, ButtonState.Button.a);
+        ButtonState shoot = new ButtonState(gamepad1, ButtonState.Button.right_trigger);
 
         PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
         FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
@@ -127,6 +132,7 @@ public class Shooter_PIDFEx extends LinearOpMode {
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
+        m_robot.shooter.idle();
 
 
         waitForStart();
@@ -145,6 +151,12 @@ public class Shooter_PIDFEx extends LinearOpMode {
             }
             if(setVals.newPress()){
                 m_robot.shooter.setPIDFExCoeeficients(pidExCoeff, ffCoeff);
+            }
+
+            if(shoot.getCurrentPress()){
+                m_robot.shooter.loadArtifact(1.0);
+            } else if (shoot.newRelease()){
+                m_robot.shooter.loadArtifact(0);
             }
 
             telemetry.addData("Setpoint:", targetRPM);

@@ -40,7 +40,7 @@ public class ScanIntake implements Action {
 
             waiting = timer.seconds() < holdTime;
 
-            if (running & spindexer.spindexerAtTarget() && !waiting) {
+            if (running && spindexer.spindexerAtTarget() && !waiting) {
                 if(spindexer.isIntakeSlotFull()){
                     spindexer.setSlot(targetSlot, spindexer.getIntakeColor());
                 } else {
