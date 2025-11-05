@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
+@Disabled
 @TeleOp(name = "Calibrate Color Sensors", group = "Calibration")
 public class ColorSensorCalibration extends LinearOpMode {
 

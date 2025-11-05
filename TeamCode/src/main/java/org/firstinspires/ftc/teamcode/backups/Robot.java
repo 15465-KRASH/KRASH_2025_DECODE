@@ -1,10 +1,14 @@
-package org.firstinspires.ftc.teamcode.classes;
+package org.firstinspires.ftc.teamcode.backups;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.classes.Intake;
+import org.firstinspires.ftc.teamcode.classes.Lift;
+import org.firstinspires.ftc.teamcode.classes.Shooter;
+import org.firstinspires.ftc.teamcode.classes.Spindexer;
 import org.firstinspires.ftc.teamcode.classes.vision.Vision;
 
 public class Robot {
