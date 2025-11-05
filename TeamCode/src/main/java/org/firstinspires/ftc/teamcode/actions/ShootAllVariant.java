@@ -11,8 +11,7 @@ import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
 public class ShootAllVariant implements Action {
     private boolean initialized = false;
-    private boolean ammoRdy = false;
-    private boolean running = true;
+    private boolean running = false;
     private boolean atSpeed = false;
     private boolean safeMove = false;
     private boolean canceled = false;
@@ -30,10 +29,10 @@ public class ShootAllVariant implements Action {
     private Spindexer.DetectedColor colorTarget = Spindexer.DetectedColor.ANY;
 
     //Timers
-    private double firstShotHoldMin = 1.5;
-    private double firstShotWait = 1.0;
-    private double secondShotWait = 1.0;
-    private double finalShotWait = 2.0;
+    private double firstShotHoldMin = 1.0;
+    private double firstShotWait = 0.75;
+    private double secondShotWait = 0.75;
+    private double finalShotWait = 1.5;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -58,17 +57,22 @@ public class ShootAllVariant implements Action {
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
         if (!canceled) {
+            shooter.updateController();
             if (!initialized) {
                 getNextColor(1);
-                shooter.spinUp();
+                shooter.spinUp(shooter.targetRPM);
                 timer.reset();
                 lastshot = false;
                 waiting = true;
-                safeMove = false;
                 initialized = true;
                 running = true;
                 currentShot = 1;
-                targetSlot = spindexer.gotoClosestFullShooter(colorTarget);
+                if (shotType == ShotType.ShootAll) {
+                    targetSlot = 0;
+                    spindexer.moveToShooterPos(targetSlot);
+                } else {
+                    targetSlot = spindexer.gotoClosestFullShooter(colorTarget);
+                }
             }
 
             if(targetSlot == -1 && !lastshot){
@@ -116,7 +120,11 @@ public class ShootAllVariant implements Action {
                     if(currentShot < totalShots){
                         currentShot ++;
                         getNextColor(currentShot);
-                        targetSlot = spindexer.findFullShooterSlot(colorTarget);
+                        if (shotType == ShotType.ShootAll) {
+                            targetSlot = currentShot - 1;
+                        } else {
+                            targetSlot = spindexer.gotoClosestFullShooter(colorTarget);
+                        }
                     } else {
                         targetSlot = -1;
                     }
@@ -158,7 +166,6 @@ public class ShootAllVariant implements Action {
                 totalShots = 1;
                 break;
             case ShootPattern:
-                // TODO: Replace with method supplying pattern color order
                 colorTarget = getColorTarget(shotNumber);
                 totalShots = 3;
                 break;

@@ -366,9 +366,14 @@ public class Spindexer {
 
     public void manualSpindexer(){
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rotationMotor.setPower(0.5);
+        rotationMotor.setPower(0.15);
     }
 
+    public void zeroSpindexer(){
+        DcMotor.RunMode mode = rotationMotor.getMode();
+        rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotationMotor.setMode(mode);
+    }
 
 
 }

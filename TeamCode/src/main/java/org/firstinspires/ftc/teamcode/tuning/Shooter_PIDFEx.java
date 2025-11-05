@@ -31,22 +31,22 @@ package org.firstinspires.ftc.teamcode.tuning;
 
 import android.annotation.SuppressLint;
 
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.PIDEx;
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
+import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
+import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
-import org.firstinspires.ftc.teamcode.actions.ScanIntake;
-import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 
 import java.util.ArrayList;
@@ -66,9 +66,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 @Config
-@TeleOp(name = "Shooter PIDF", group = "Tuning")
+@TeleOp(name = "Shooter PIDF_Ex", group = "Tuning")
 //@Disabled
-public class Shooter_PIDF extends LinearOpMode {
+public class Shooter_PIDFEx extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -87,11 +87,17 @@ public class Shooter_PIDF extends LinearOpMode {
         }
     }
 
-    public static int targetRPM = 3000;
-    public static double p = 0;
-    public static double i = 0;
-    public static double d = 0;
-    public static double f = 0;
+    public static int targetRPM = 3250;
+    //PIDEx Setup
+    public static double Kp = 0.003;
+    public static double Ki = 0;
+    public static double Kd = 0.0002;
+    public static double Kv = 0.00043; //1.1;
+    public static double Ka = 0; //0.2;
+    public static double Ks = 0; //0.001;
+    public static double targetAccelTime = 0.5; //seconds
+
+
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -100,15 +106,20 @@ public class Shooter_PIDF extends LinearOpMode {
         List<Action> runningActions = new ArrayList<>();
 
         TelemetryPacket packet = new TelemetryPacket();
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0, 0, 0));
 
         ButtonState spinUp = new ButtonState(gamepad1, ButtonState.Button.right_bumper);
         ButtonState spinDown = new ButtonState(gamepad1, ButtonState.Button.left_bumper);
         ButtonState setVals = new ButtonState(gamepad1, ButtonState.Button.a);
+        ButtonState shoot = new ButtonState(gamepad1, ButtonState.Button.right_trigger);
 
-        PIDFCoefficients pidf = new PIDFCoefficients();
-        pidf = new PIDFCoefficients(p, i, d, f);
-        m_robot.shooter.setPIDF(pidf);
+        PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
+        FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
+
+        m_robot.shooter.setPIDFExCoeeficients(pidExCoeff, ffCoeff);
 
         int tagID = 0;
 
@@ -121,31 +132,42 @@ public class Shooter_PIDF extends LinearOpMode {
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
+        m_robot.shooter.idle();
 
 
         waitForStart();
 
         while(opModeIsActive()){
-            pidf = new PIDFCoefficients(p, i, d, f);
-            PIDFCoefficients pidfRead = m_robot.shooter.showPIDFVals();
+            m_robot.shooter.updateController();
+
+            pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
+            ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
 
             if(spinUp.newPress()){
-                m_robot.shooter.setTargetSpeed(targetRPM);
                 m_robot.shooter.spinUp(targetRPM);
             }
             if(spinDown.newPress()){
                 m_robot.shooter.idle();
             }
             if(setVals.newPress()){
-                m_robot.shooter.setPIDF(pidf);
+                m_robot.shooter.setPIDFExCoeeficients(pidExCoeff, ffCoeff);
+            }
+
+            if(shoot.getCurrentPress()){
+                m_robot.shooter.loadArtifact(1.0);
+            } else if (shoot.newRelease()){
+                m_robot.shooter.loadArtifact(0);
             }
 
             telemetry.addData("Setpoint:", targetRPM);
             telemetry.addData("Velocity:", 60 * m_robot.shooter.getSpeed() / m_robot.shooter.ticksPerRev);
-            telemetry.addData("P:", pidfRead.p);
-            telemetry.addData("I:", pidfRead.i);
-            telemetry.addData("D:", pidfRead.d);
-            telemetry.addData("F:", pidfRead.f);
+            telemetry.addData("Kp:", Kp);
+            telemetry.addData("Ki:", Ki);
+            telemetry.addData("Kd:", Kd);
+            telemetry.addData("Kv:", Kv);
+            telemetry.addData("Ka:", Ka);
+            telemetry.addData("Ks:", Ks);
+            telemetry.addData("targetAccelTime:", targetAccelTime);
             telemetry.update();
 
         }

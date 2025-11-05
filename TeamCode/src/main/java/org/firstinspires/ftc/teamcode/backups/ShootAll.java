@@ -37,7 +37,7 @@ public class ShootAll implements Action {
             if (!initialized) {
                 lastshot = false;
                 waiting = false;
-                shooter.spinUp();
+                shooter.spinUp(shooter.targetRPM);
                 initialized = true;
                 safeMove = false;
                 targetSlot = spindexer.gotoClosestFullShooter(Spindexer.DetectedColor.ANY);
