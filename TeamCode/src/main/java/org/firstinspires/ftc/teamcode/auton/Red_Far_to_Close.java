@@ -47,6 +47,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
@@ -73,9 +74,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Red_Far", group = "Comp")
-//@Disabled
-public class Red_Far extends LinearOpMode {
+@Autonomous(name = "Red_Far_to_Close", group = "Comp")
+@Disabled
+public class Red_Far_to_Close extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -118,8 +119,9 @@ public class Red_Far extends LinearOpMode {
         Pose2d startPickup = new Pose2d(new Vector2d(35, 19), Math.toRadians(90));
         Pose2d finishPickup = new Pose2d(new Vector2d(35, 42), Math.toRadians(90));
         Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 48), Math.toRadians(90));
-        Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 42), Math.toRadians(90));
+        Pose2d lastShot = new Pose2d(new Vector2d(0, 22), Math.toRadians(135));
+        Pose2d finalPos = new Pose2d(new Vector2d(52, 21), Math.toRadians(160));
 
         VelConstraint pickupVelConstraint = new MinVelConstraint(Arrays.asList(
                 new TranslationalVelConstraint(50.0),
@@ -145,7 +147,7 @@ public class Red_Far extends LinearOpMode {
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
                 .splineToSplineHeading(startPickup, Math.toRadians(90))
-                .splineToSplineHeading(finishPickup, Math.toRadians(90), new TranslationalVelConstraint(4));
+                .splineToSplineHeading(finishPickup, Math.toRadians(90), new TranslationalVelConstraint(7));
 
         Action pickupFirstAction = pickupFirst.build();
 
@@ -162,9 +164,15 @@ public class Red_Far extends LinearOpMode {
 
         Action pickupSecondAction = pickupSecond.build();
 
-        TrajectoryActionBuilder finalPosTraj = pickupSecond.endTrajectory().fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(finalPos, Math.toRadians(179.9));
+        TrajectoryActionBuilder shootThirdTraj = pickupSecond.endTrajectory().fresh()
+                .setTangent(Math.toRadians(-135))
+                .splineToLinearHeading(lastShot, Math.toRadians(-135));
+
+        Action shootThirdAction = shootThirdTraj.build();
+
+        TrajectoryActionBuilder finalPosTraj = shootThirdTraj.endTrajectory().fresh()
+                .setTangent(Math.toRadians(45))
+                .splineToLinearHeading(finalPos, Math.toRadians(45));
 
         Action finalPosAction = finalPosTraj.build();
 
@@ -270,19 +278,17 @@ public class Red_Far extends LinearOpMode {
         }
         telemetry.update();
 
-        Actions.runBlocking(finalPosAction);
+        m_robot.shooter.setTargetSpeed(shooterRPM);
+        m_robot.shooter.updateController();
 
-//        m_robot.shooter.setTargetSpeed(shooterRPM);
-//        m_robot.shooter.updateController();
-//
-//        m_robot.spindexer.selectAShot(shootAction);
-//
-//        Actions.runBlocking(new RaceAction(
-//                shootThirdAction,
-//                m_robot.shooter.updateFlywheel()));
-//        Actions.runBlocking(shootAction);
-//
-//        Actions.runBlocking(finalPosAction);
+        m_robot.spindexer.selectAShot(shootAction);
+
+        Actions.runBlocking(new RaceAction(
+                shootThirdAction,
+                m_robot.shooter.updateFlywheel()));
+        Actions.runBlocking(shootAction);
+
+        Actions.runBlocking(finalPosAction);
 
     }
 

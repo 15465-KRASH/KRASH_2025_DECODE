@@ -32,7 +32,6 @@ package org.firstinspires.ftc.teamcode;
 import static com.qualcomm.robotcore.util.Range.clip;
 
 import android.annotation.SuppressLint;
-import android.widget.Button;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -44,7 +43,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
@@ -102,6 +100,8 @@ public class Drive_OpMode extends LinearOpMode {
 
         int shotRPM = 3250;
 
+        Robot.TargetInfo targetInfo;
+
         telemetry.setMsTransmissionInterval(11);
         m_robot.limelight.pipelineSwitch(0);
         m_robot.limelight.start();
@@ -114,6 +114,8 @@ public class Drive_OpMode extends LinearOpMode {
 
         double hoodPos = 0;
         double hoodInc = 0.05;
+
+        double distance;
 
         boolean fieldRel = false;
 
@@ -135,7 +137,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState scanIntake =new ButtonState(gamepad2, ButtonState.Button.back);
 
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
-        ButtonState rotateSpindexer = new ButtonState(gamepad2, ButtonState.Button.x);
+        ButtonState zeroSpindexer = new ButtonState(gamepad2, ButtonState.Button.x);
         ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
         ButtonState reverseIntake = new ButtonState(gamepad2, ButtonState.Button.y);
 
@@ -151,8 +153,8 @@ public class Drive_OpMode extends LinearOpMode {
 //
 //        ButtonState selectValUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
 //        ButtonState selectValDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
-        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
-        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
+//        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
+//        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_left);
 //
 
 
@@ -197,7 +199,6 @@ public class Drive_OpMode extends LinearOpMode {
         while (opModeIsActive()) {
             m_robot.shooter.updateController();
 
-
             //m_robot.limelight.updateRobotOrientation(m_robot.drive.localizer.)
             llResult = m_robot.limelight.getLatestResult();
             if (llResult != null) {
@@ -207,7 +208,11 @@ public class Drive_OpMode extends LinearOpMode {
                     for (LLResultTypes.FiducialResult fr : fiducialResults) {
                         telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
                     }
+                } else {
+                    telemetry.addData("Result not valid", 0);
                 }
+            } else {
+                telemetry.addData("Limelight is Null", 0);
             }
 
             // Drive Code
@@ -215,16 +220,6 @@ public class Drive_OpMode extends LinearOpMode {
                 powerScale=1;
             } else if (gamepad1.left_bumper) {
                 powerScale=.3;
-            }
-
-            Vector2d input = new Vector2d(
-                    Math.pow(-gamepad1.left_stick_y, 3) * powerScale,
-                    Math.pow(-gamepad1.left_stick_x, 3) * powerScale);
-
-            m_robot.drive.localizer.update();
-
-            if(fieldRel){
-                input = m_robot.rotatedVector(input, m_robot.drive.localizer.getPose().heading.toDouble());
             }
 
             if(setRoboRel.newPress()){
@@ -237,19 +232,41 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.drive.localizer.setPose(new Pose2d(currentPose.position, 0));
             }
 
+            Vector2d input = new Vector2d(
+                    Math.pow(-gamepad1.left_stick_y, 3) * powerScale,
+                    Math.pow(-gamepad1.left_stick_x, 3) * powerScale);
+
+            m_robot.drive.localizer.update();
+
             telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
 
+            if(fieldRel){
+                input = m_robot.rotatedVector(input, -m_robot.drive.localizer.getPose().heading.toDouble());
+            }
+
+            targetInfo = m_robot.getAprilTagInfo();
+
+            distance = targetInfo.targetDistance;
+
+            telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
+            telemetry.addData("Distance to Target: ", distance);
 
             double rotation = Math.pow(-gamepad1.right_stick_x, 3) * powerScale;
 
             if (alignToGoal.getCurrentPress() && llResult != null) {
-                double offset = m_robot.getAprilTagOffset();
+                double offset = targetInfo.targetXDegrees;
                 rotation = -0.03 * offset;
             }
 
             driveControl = new PoseVelocity2d(input, rotation);
 
             m_robot.drive.setDrivePowers(driveControl);
+
+            if(runLift.getCurrentPress() && gamepad1.dpad_left){
+                m_robot.lift.runLift();
+            } else {
+                m_robot.lift.stopLift();
+            }
 
             if(intakeArtifact.newPress()){
                 intakeAction.clearCancel();
@@ -277,9 +294,9 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.intake.stop();
             }
 
-            if(rotateSpindexer.getCurrentPress()){
+            if(zeroSpindexer.getCurrentPress()){
                 m_robot.spindexer.manualSpindexer();
-            } else if (rotateSpindexer.newRelease()){
+            } else if (zeroSpindexer.newRelease()){
                 m_robot.spindexer.stop();
                 m_robot.spindexer.zeroSpindexer();
             }
@@ -299,7 +316,7 @@ public class Drive_OpMode extends LinearOpMode {
 
             if(shootAll.newPress()){
                 shootAction.clearCancel();
-                m_robot.shooter.setTargetSpeed(shotRPM);
+                m_robot.shooter.setupShooter(distance);
                 shootAction.selectShot(ShootAllVariant.ShotType.ShootAll);
                 runningActions.add(shootAction);
             } else if (shootAll.newRelease()){
@@ -337,11 +354,6 @@ public class Drive_OpMode extends LinearOpMode {
             } else if (shootAll.newRelease()){
                 shootAction.cancel();
             }
-
-            if(runLift.getCurrentPress()){
-                m_robot.lift.manualClimb(0.5);
-            }
-
 
             /***
              * Test Buttons
@@ -425,7 +437,7 @@ public class Drive_OpMode extends LinearOpMode {
 
             telemetry.addData("Spindexer Pos", m_robot.spindexer.getSpindexerPos());
 
-
+//
 //            if(valUp.newPress()){
 //                hoodPos = clip(hoodPos + hoodInc,-1, 1);
 //                m_robot.shooter.setHood(hoodPos);

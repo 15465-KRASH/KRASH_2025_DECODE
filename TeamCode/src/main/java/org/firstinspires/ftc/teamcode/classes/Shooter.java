@@ -42,7 +42,26 @@ public class Shooter {
 
     FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
     BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
+    
+    public class ShooterSettings {
+        double minDistance;
+        double hoodPos;
+        int rpm;
+        
+        public ShooterSettings(double minDistance, double hoodPos, int rpm){
+            this.minDistance = minDistance;
+            this.hoodPos = hoodPos;
+            this.rpm = rpm;
+        }
+    }
 
+    ShooterSettings reallyfarShot = new ShooterSettings(2.5,0, 3400);
+    ShooterSettings farShot = new ShooterSettings(2.0,0, 3250);
+    ShooterSettings topOfTheKey = new ShooterSettings(1.25,0.25, 2800);
+    ShooterSettings belowTheKey = new ShooterSettings(1.0,0.25, 2600);
+    
+    ShooterSettings[] settingsArray = {reallyfarShot, farShot, topOfTheKey, belowTheKey};
+    
     public static final int ticksPerRev = 28;
     public int targetRPM = 0;
     public int targetRPS = targetRPM / 60;
@@ -88,8 +107,8 @@ public class Shooter {
             flywheel.setPower(0);
         }
 
-//        telemetry.addData("currentSpeed: ", currentSpeed);
-//        telemetry.addData("targetSpeed: ", targetSpeed);
+        telemetry.addData("currentSpeed: ", currentSpeed);
+        telemetry.addData("targetSpeed: ", targetSpeed);
 //        telemetry.addData("targetAccel: ", targetAccel);
 //        telemetry.addData("pidOutput: ", pidOutput);
 //        telemetry.addData("ffoutput: ", ffOutput);
@@ -169,6 +188,23 @@ public class Shooter {
     public void setPIDFExCoeeficients(PIDCoefficientsEx pidExCoeff, FeedforwardCoefficients ffCoeff){
         motorController = new PIDEx(pidExCoeff);
         motorFFController = new BasicFeedforward(ffCoeff);
+    }
+    
+    public void setupShooter(double distance){
+        if(distance == 0){
+            setHood(settingsArray[0].hoodPos);
+            setTargetSpeed(settingsArray[0].rpm);
+            return;
+        }
+        for (ShooterSettings setting: settingsArray) {
+            if(distance > setting.minDistance){
+                setHood(setting.hoodPos);
+                setTargetSpeed(setting.rpm);
+                return;
+            }
+        }
+        setHood(settingsArray[settingsArray.length - 1].hoodPos);
+        setTargetSpeed(settingsArray[settingsArray.length - 1].rpm);
     }
 
 }

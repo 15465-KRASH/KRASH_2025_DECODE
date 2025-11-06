@@ -32,7 +32,7 @@ public class ShootAllVariant implements Action {
     private double firstShotHoldMin = 1.0;
     private double firstShotWait = 0.75;
     private double secondShotWait = 0.75;
-    private double finalShotWait = 1.5;
+    private double finalShotWait = 0.75;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -72,8 +72,11 @@ public class ShootAllVariant implements Action {
                     spindexer.moveToShooterPos(targetSlot);
                 } else {
                     targetSlot = spindexer.gotoClosestFullShooter(colorTarget);
+//                    sleep(2000);
                 }
             }
+//            packet.put("Cunnret Condition: ", 0);
+//            sleep(5);
 
             if(targetSlot == -1 && !lastshot){
                 cleanup();
@@ -82,6 +85,8 @@ public class ShootAllVariant implements Action {
             }
 
             atSpeed = shooter.atSpeed();
+
+//            packet.put("CurrentShot:", currentShot);
 
             if(lastshot){
                 waiting = timer.seconds() <= finalShotWait;
@@ -104,6 +109,9 @@ public class ShootAllVariant implements Action {
                     }
                 }
             }
+
+//            packet.put("Cunnret Condition: ", 1);
+//            sleep(5);
             
             if (atSpeed && !waiting) {
                 if (spindexer.spindexerAtTarget()) {
@@ -117,13 +125,15 @@ public class ShootAllVariant implements Action {
                     packet.put("Color 1: ", spindexer.spindexerSlots[1].name());
                     packet.put("Color 2: ", spindexer.spindexerSlots[2].name());
 
+//                    packet.put("Current Condition: ", 2);
+
                     if(currentShot < totalShots){
                         currentShot ++;
                         getNextColor(currentShot);
                         if (shotType == ShotType.ShootAll) {
                             targetSlot = currentShot - 1;
                         } else {
-                            targetSlot = spindexer.gotoClosestFullShooter(colorTarget);
+                            targetSlot = spindexer.findFullShooterSlot(colorTarget);
                         }
                     } else {
                         targetSlot = -1;

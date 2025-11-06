@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Lift;
 import org.firstinspires.ftc.teamcode.classes.Shooter;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
-import org.firstinspires.ftc.teamcode.classes.vision.Vision;
 
 import java.util.List;
 
@@ -27,6 +26,23 @@ public class Robot {
     public Spindexer spindexer;
     public Limelight3A limelight;
 
+    public class TargetInfo {
+        double targetXDegrees;
+        double targetDistance;
+
+        public TargetInfo(LLResultTypes.FiducialResult results ){
+            targetXDegrees = results.getTargetXDegrees();
+            targetDistance = -results.getCameraPoseTargetSpace().getPosition().z;
+        }
+
+        public TargetInfo(){
+            targetDistance = 0;
+            targetXDegrees = 0;
+        }
+    }
+
+    public TargetInfo targetInfo;
+
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
         this.hardwareMap = hardwareMap;
@@ -40,7 +56,7 @@ public class Robot {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
     }
 
-    public double getAprilTagOffset () {
+    public TargetInfo getAprilTagInfo() {
         LLResult llResult;
         llResult = limelight.getLatestResult();
         if (llResult != null) {
@@ -49,12 +65,12 @@ public class Robot {
                 List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
                 for (LLResultTypes.FiducialResult fr : fiducialResults) {
                     if (fr.getFiducialId() == 20 || fr.getFiducialId() == 24) {
-                        return fr.getTargetXDegrees();
+                        return new TargetInfo(fr);
                     }
                 }
             }
         }
-        return 0;
+        return new TargetInfo();
     }
 
     public double getTurnToTargetRotation() {
@@ -75,9 +91,9 @@ public class Robot {
     }
 
 
-    public Vector2d rotatedVector(Vector2d myVector, double angleDegrees){
+    public Vector2d rotatedVector(Vector2d myVector, double angleRadians){
         // For reference, this is what rotateBy() does internally
-        double angleRadians = Math.toRadians(angleDegrees);
+//        double angleRadians = Math.toRadians(angleDegrees);
         double x_rotated = myVector.x * Math.cos(angleRadians) - myVector.y * Math.sin(angleRadians);
         double y_rotated = myVector.x * Math.sin(angleRadians) + myVector.y * Math.cos(angleRadians);
         return new Vector2d(x_rotated, y_rotated);

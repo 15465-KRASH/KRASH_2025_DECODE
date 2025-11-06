@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.classes;
 
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 
 public class Spindexer {
     private HardwareMap hardwareMap;
@@ -37,7 +39,7 @@ public class Spindexer {
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 100;
+    public double intakeDistLimit = 105;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -373,6 +375,35 @@ public class Spindexer {
         DcMotor.RunMode mode = rotationMotor.getMode();
         rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotationMotor.setMode(mode);
+    }
+
+    public boolean hasGPP(){
+        int greenCount = 0;
+        int purpleCount = 0;
+
+        for(int x = 0; x < 3; x++){
+            if(spindexerSlots[x] == DetectedColor.GREEN){
+                greenCount ++;
+            } else if (spindexerSlots[x] == DetectedColor.PURPLE){
+                purpleCount ++;
+            }
+        }
+
+        if(purpleCount == 2 && greenCount ==1){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public ShootAllVariant.ShotType selectAShot(ShootAllVariant shootAction) {
+        if (hasGPP()) {
+            shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
+            return ShootAllVariant.ShotType.ShootPattern;
+        } else {
+            shootAction.selectShot(ShootAllVariant.ShotType.ShootAll);
+            return ShootAllVariant.ShotType.ShootAll;
+        }
     }
 
 

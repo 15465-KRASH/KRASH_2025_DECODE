@@ -51,7 +51,18 @@ public class IntakeArtifact implements Action {
 
             if (running) {
                 if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
-                    spindexer.setSlot(targetSlot, spindexer.getIntakeColor());
+//                    Spindexer.DetectedColor tempColor =  spindexer.getIntakeColor();
+//                    int x = 0;
+//                    while (tempColor == Spindexer.DetectedColor.NONE && x < 5){
+//                        x++;
+//                        spindexer.setSlot(targetSlot, tempColor);
+//                        tempColor =  spindexer.getIntakeColor();
+//                    }
+
+//                    if(spindexer.getSlotColor(targetSlot) == Spindexer.DetectedColor.NONE){
+                        spindexer.setSlotPurple(targetSlot);
+//                    }
+
                     targetSlot = spindexer.gotoClosestEmptyIntake();
                     if (targetSlot != -1) {
                         intake.intakeArtifact();

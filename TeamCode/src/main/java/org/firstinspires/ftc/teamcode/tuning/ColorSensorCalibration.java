@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
-@Disabled
 @TeleOp(name = "Calibrate Color Sensors", group = "Calibration")
 public class ColorSensorCalibration extends LinearOpMode {
 

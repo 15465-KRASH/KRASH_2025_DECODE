@@ -22,6 +22,8 @@ public class Lift {
     public static double KvI = 1.0;
     public static double KF = 1.0;
 
+    public int liftTarget = 4800;
+
     public Lift (HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
@@ -32,6 +34,9 @@ public class Lift {
         leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        leftClimbMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightClimbMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         leftClimbMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rightClimbMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
@@ -41,12 +46,29 @@ public class Lift {
 
     }
 
-    public void runLift(int pose) {
-        leftClimbMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightClimbMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    public void runLift() {
+//        leftClimbMotor.setTargetPosition(liftTarget);
+//        rightClimbMotor.setTargetPosition(liftTarget);
+//
+//        leftClimbMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightClimbMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        leftClimbMotor.setTargetPosition(pose);
-        rightClimbMotor.setTargetPosition(pose);
+        leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if(leftClimbMotor.getCurrentPosition() < liftTarget){
+            leftClimbMotor.setPower(0.5);
+        }
+        else {
+            leftClimbMotor.setPower(0);
+        }
+
+        if(rightClimbMotor.getCurrentPosition() < liftTarget){
+            rightClimbMotor.setPower(0.5);
+        } else {
+            rightClimbMotor.setPower(0);
+        }
+
     }
 
     public void stopLift() {
@@ -69,8 +91,16 @@ public class Lift {
         leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+//        telemetry.addData("Left Motor:", leftClimbMotor.getCurrentPosition());
+//        telemetry.addData("Right Motor:", rightClimbMotor.getCurrentPosition());
+
         leftClimbMotor.setPower(power);
         rightClimbMotor.setPower(power);
+    }
+
+    public void reportPosition(){
+        telemetry.addData("Left Motor:", leftClimbMotor.getCurrentPosition());
+        telemetry.addData("Right Motor:", rightClimbMotor.getCurrentPosition());
     }
 
 
