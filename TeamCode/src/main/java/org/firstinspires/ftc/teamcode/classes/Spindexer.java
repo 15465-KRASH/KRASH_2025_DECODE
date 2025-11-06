@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.classes;
 
+import android.graphics.Color;
+
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -45,6 +49,8 @@ public class Spindexer {
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
 
     int[] readCounter = new int[10];
+
+    final float[] hsvValues = new float[3];
 
     public enum DetectedColor {
         GREEN,
@@ -141,6 +147,18 @@ public class Spindexer {
             return DetectedColor.NONE;
         }
 
+    }
+
+    public void readIntakeHSV(){
+        NormalizedRGBA colors = intakeSensor.getNormalizedColors();
+
+        // Update the hsvValues array by passing it to Color.colorToHSV()
+        Color.colorToHSV(colors.toColor(), hsvValues);
+
+        telemetry.addLine()
+                .addData("Hue", "%.3f", hsvValues[0])
+                .addData("Saturation", "%.3f", hsvValues[1])
+                .addData("Value", "%.3f", hsvValues[2]);
     }
 
     public DetectedColor getIntakeColor(){

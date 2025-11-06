@@ -60,6 +60,8 @@ public class ColorSensorCalibration extends LinearOpMode {
 
             telemetry.addData("Spindexer Pos", spindexer.getSpindexerPos());
 
+            spindexer.readIntakeHSV();
+
             telemetry.update();
         }
     }
