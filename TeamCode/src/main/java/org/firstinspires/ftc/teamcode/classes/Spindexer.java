@@ -149,16 +149,25 @@ public class Spindexer {
 
     }
 
-    public void readIntakeHSV(){
+    public DetectedColor readIntakeHSV(){
         NormalizedRGBA colors = intakeSensor.getNormalizedColors();
-
+        DetectedColor finalColor;
         // Update the hsvValues array by passing it to Color.colorToHSV()
         Color.colorToHSV(colors.toColor(), hsvValues);
+
+        if(hsvValues[0] < 180){
+            finalColor = DetectedColor.GREEN;
+        } else {
+            finalColor = DetectedColor.PURPLE;
+        }
 
         telemetry.addLine()
                 .addData("Hue", "%.3f", hsvValues[0])
                 .addData("Saturation", "%.3f", hsvValues[1])
-                .addData("Value", "%.3f", hsvValues[2]);
+                .addData("Value", "%.3f", hsvValues[2])
+                .addData("Detected Color: ", finalColor.toString());
+
+        return finalColor;
     }
 
     public DetectedColor getIntakeColor(){
