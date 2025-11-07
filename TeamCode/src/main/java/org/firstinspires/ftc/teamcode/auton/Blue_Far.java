@@ -51,6 +51,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
+import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
@@ -132,7 +133,7 @@ public class Blue_Far extends LinearOpMode {
         m_robot.limelight.pipelineSwitch(0);
         m_robot.limelight.start();
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, true);
+        IntakeArtifactInOrder intakeAction = new IntakeArtifactInOrder(m_robot.intake, m_robot.spindexer, true);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
@@ -236,12 +237,12 @@ public class Blue_Far extends LinearOpMode {
         }
         telemetry.update();
 
-        m_robot.spindexer.selectAShot(shootAction);
-
         Actions.runBlocking(new ParallelAction(
                 intakeAction,
                 pickupFirstAction
         ));
+
+        m_robot.spindexer.initSpindexer(0);
 
         for(int x = 0; x <=2; x++){
             telemetry.addLine()
@@ -269,6 +270,8 @@ public class Blue_Far extends LinearOpMode {
                 intakeAction,
                 pickupSecondAction
         ));
+
+        m_robot.spindexer.initSpindexer(1);
 
         for(int x = 0; x <=2; x++){
             telemetry.addLine()

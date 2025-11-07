@@ -227,9 +227,9 @@ public class Red_Far extends LinearOpMode {
                 m_robot.shooter.updateFlywheel()));
         Actions.runBlocking(shootAction);
 
-        m_robot.shooter.setHood(0.25);
-//        sleep(2000);
-        m_robot.shooter.setHood(0);
+//        m_robot.shooter.setHood(0.25);
+////        sleep(2000);
+//        m_robot.shooter.setHood(0);
         telemetry.addData("First Shot Done:", 0);
         m_robot.spindexer.showSlots();
         telemetry.update();

@@ -43,7 +43,7 @@ public class Spindexer {
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 90;
+    public double intakeDistLimit = 94;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -151,14 +151,14 @@ public class Spindexer {
 
     public DetectedColor readIntakeHSV(){
         NormalizedRGBA colors = intakeSensor.getNormalizedColors();
-        DetectedColor finalColor;
+        DetectedColor finalColor = DetectedColor.ANY;
         // Update the hsvValues array by passing it to Color.colorToHSV()
         Color.colorToHSV(colors.toColor(), hsvValues);
 
-        if(hsvValues[0] < 170){
-            finalColor = DetectedColor.GREEN;
-        } else {
+        if(hsvValues[0] > 185){
             finalColor = DetectedColor.PURPLE;
+        } else  if(hsvValues[0] < 170 && hsvValues[2] > 0.07){
+            finalColor = DetectedColor.GREEN;
         }
 
         telemetry.addLine()
@@ -177,13 +177,13 @@ public class Spindexer {
     public float incrementIntakeGain(float increment){
         float newVal = intakeSensor.getGain() + increment;
         intakeSensor.setGain(newVal);
-        return increment;
+        return newVal;
     }
 
     public float decrementIntakeGain(float increment){
         float newVal = intakeSensor.getGain() - increment;
         intakeSensor.setGain(newVal);
-        return increment;
+        return newVal;
     }
 
     public void rotate(int pose) {

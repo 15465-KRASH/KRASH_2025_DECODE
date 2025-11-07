@@ -29,6 +29,8 @@ public class ColorSensorCalibration extends LinearOpMode {
 
         NormalizedRGBA colors;
 
+        float gain = 0;
+
         waitForStart();
 
         //spindexer.getDetectedColor(spindexer.intakeSensor, telemetry);
@@ -66,12 +68,13 @@ public class ColorSensorCalibration extends LinearOpMode {
             float step = 5;
 
             if(valUp.newPress()){
-                telemetry.addData("Gain: ", spindexer.incrementIntakeGain(step));
+                gain = spindexer.incrementIntakeGain(step);
             }
 
             if(valDown.newPress()){
-                telemetry.addData("Gain: ", spindexer.decrementIntakeGain(step));
+                gain = spindexer.decrementIntakeGain(step);
             }
+            telemetry.addData("Gain: ", gain);
 
             spindexer.readIntakeHSV();
 

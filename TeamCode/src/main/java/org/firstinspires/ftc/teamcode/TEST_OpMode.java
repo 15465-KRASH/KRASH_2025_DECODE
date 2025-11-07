@@ -139,8 +139,8 @@ public class TEST_OpMode extends LinearOpMode {
         ButtonState intakeArtifactPGP = new ButtonState(gamepad1, ButtonState.Button.b);
         ButtonState intakeArtifactPPG = new ButtonState(gamepad1, ButtonState.Button.a);
         ButtonState setShooter1 = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
-        ButtonState setShooter2 = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
-        ButtonState setShooter3 = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
+        ButtonState setShooter2 = new ButtonState(gamepad1, ButtonState.Button.dpad_right);
+        ButtonState setShooter3 = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
 
         ButtonState zeroSpindexer = new ButtonState(gamepad1, ButtonState.Button.x);
 //        ButtonState stopIntake = new ButtonState(gamepad2, ButtonState.Button.b);
@@ -295,6 +295,16 @@ public class TEST_OpMode extends LinearOpMode {
                 runningActions.add(shootAction);
             } else if (shootAll.newRelease()){
                 shootAction.cancel();
+            }
+
+            if(setShooter1.newPress()){
+                m_robot.spindexer.moveToShooterPos(0);
+            }
+            if(setShooter2.newPress()){
+                m_robot.spindexer.moveToShooterPos(1);
+            }
+            if(setShooter3.newPress()){
+                m_robot.spindexer.moveToShooterPos(2);
             }
 
 //            if(shootPattern.newPress()){
