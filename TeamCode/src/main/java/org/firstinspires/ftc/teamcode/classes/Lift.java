@@ -22,7 +22,7 @@ public class Lift {
     public static double KvI = 1.0;
     public static double KF = 1.0;
 
-    public int liftTarget = 4800;
+    public int liftTarget = 5200;
 
     public Lift (HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;

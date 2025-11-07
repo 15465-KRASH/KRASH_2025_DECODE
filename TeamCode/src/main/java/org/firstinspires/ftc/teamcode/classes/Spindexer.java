@@ -43,7 +43,7 @@ public class Spindexer {
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 105;
+    public double intakeDistLimit = 90;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -155,7 +155,7 @@ public class Spindexer {
         // Update the hsvValues array by passing it to Color.colorToHSV()
         Color.colorToHSV(colors.toColor(), hsvValues);
 
-        if(hsvValues[0] < 180){
+        if(hsvValues[0] < 170){
             finalColor = DetectedColor.GREEN;
         } else {
             finalColor = DetectedColor.PURPLE;
@@ -433,5 +433,13 @@ public class Spindexer {
         }
     }
 
+    public void showSlots(){
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", getSlotColor(x).name());
+        }
+//        telemetry.update();
+    }
 
 }

@@ -44,9 +44,9 @@ public class Shooter {
     BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
     
     public class ShooterSettings {
-        double minDistance;
-        double hoodPos;
-        int rpm;
+        public double minDistance;
+        public double hoodPos;
+        public int rpm;
         
         public ShooterSettings(double minDistance, double hoodPos, int rpm){
             this.minDistance = minDistance;
@@ -55,10 +55,10 @@ public class Shooter {
         }
     }
 
-    ShooterSettings reallyfarShot = new ShooterSettings(2.5,0, 3400);
-    ShooterSettings farShot = new ShooterSettings(2.0,0, 3250);
-    ShooterSettings topOfTheKey = new ShooterSettings(1.25,0.25, 2800);
-    ShooterSettings belowTheKey = new ShooterSettings(1.0,0.25, 2600);
+    public ShooterSettings reallyfarShot = new ShooterSettings(2.5,0, 3400);
+    public ShooterSettings farShot = new ShooterSettings(2.0,0, 3250);
+    public ShooterSettings topOfTheKey = new ShooterSettings(1.25,0.25, 2850);
+    public ShooterSettings belowTheKey = new ShooterSettings(1.0,0.25, 2600);
     
     ShooterSettings[] settingsArray = {reallyfarShot, farShot, topOfTheKey, belowTheKey};
     
@@ -107,8 +107,8 @@ public class Shooter {
             flywheel.setPower(0);
         }
 
-        telemetry.addData("currentSpeed: ", currentSpeed);
-        telemetry.addData("targetSpeed: ", targetSpeed);
+//        telemetry.addData("currentSpeed: ", currentSpeed);
+//        telemetry.addData("targetSpeed: ", targetSpeed);
 //        telemetry.addData("targetAccel: ", targetAccel);
 //        telemetry.addData("pidOutput: ", pidOutput);
 //        telemetry.addData("ffoutput: ", ffOutput);
@@ -192,8 +192,8 @@ public class Shooter {
     
     public void setupShooter(double distance){
         if(distance == 0){
-            setHood(settingsArray[0].hoodPos);
-            setTargetSpeed(settingsArray[0].rpm);
+            setHood(settingsArray[2].hoodPos);
+            setTargetSpeed(settingsArray[2].rpm);
             return;
         }
         for (ShooterSettings setting: settingsArray) {

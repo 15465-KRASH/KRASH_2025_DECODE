@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -10,6 +14,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Lift;
+import org.firstinspires.ftc.teamcode.classes.Lights;
 import org.firstinspires.ftc.teamcode.classes.Shooter;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
@@ -25,20 +30,35 @@ public class Robot {
     public Intake intake;
     public Spindexer spindexer;
     public Limelight3A limelight;
+    public Lights lights = null;
+
+    public boolean lightsInstalled = false;
+
+
 
     public class TargetInfo {
-        double targetXDegrees;
-        double targetDistance;
+        public double targetXDegrees;
+        public double targetDistance;
+        public int tagID;
 
         public TargetInfo(LLResultTypes.FiducialResult results ){
             targetXDegrees = results.getTargetXDegrees();
             targetDistance = -results.getCameraPoseTargetSpace().getPosition().z;
+            tagID = results.getFiducialId();
         }
 
         public TargetInfo(){
             targetDistance = 0;
             targetXDegrees = 0;
+            tagID = 0;
         }
+
+        public TargetInfo(int tagID, double targetDistance, double targetXDegrees){
+            this.targetDistance = targetDistance;
+            this.targetXDegrees = targetXDegrees;
+            this.tagID = tagID;
+        }
+
     }
 
     public TargetInfo targetInfo;
@@ -54,6 +74,11 @@ public class Robot {
         intake = new Intake(hardwareMap, telemetry);
         spindexer = new Spindexer(hardwareMap, telemetry);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        if(lightsInstalled){
+            lights = new Lights(hardwareMap,telemetry);
+            lights.setYellow();
+        }
     }
 
     public TargetInfo getAprilTagInfo() {
@@ -71,6 +96,25 @@ public class Robot {
             }
         }
         return new TargetInfo();
+    }
+
+    public TargetInfo getObeliskInfo() {
+        LLResult llResult;
+        llResult = limelight.getLatestResult();
+        if (llResult != null) {
+            if (llResult.isValid()) {
+                // Access AprilTag results
+                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
+                        telemetry.addData("Tag ID:", fr.getFiducialId());
+                        telemetry.update();
+                        return new TargetInfo(fr);
+                    }
+                }
+            }
+        }
+        return new TargetInfo(21, 0,0);
     }
 
     public double getTurnToTargetRotation() {
@@ -97,5 +141,21 @@ public class Robot {
         double x_rotated = myVector.x * Math.cos(angleRadians) - myVector.y * Math.sin(angleRadians);
         double y_rotated = myVector.x * Math.sin(angleRadians) + myVector.y * Math.cos(angleRadians);
         return new Vector2d(x_rotated, y_rotated);
+    }
+
+    public Action updateLimelight() {
+        return new Action() {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                targetInfo = getObeliskInfo();
+                return true;
+            }
+        };
+    }
+
+    public TargetInfo getTargetInfo() {
+        return targetInfo;
     }
 }

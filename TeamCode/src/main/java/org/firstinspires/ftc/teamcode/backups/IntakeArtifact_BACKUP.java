@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.actions;
+package org.firstinspires.ftc.teamcode.backups;
 
 import androidx.annotation.NonNull;
 
@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
-public class IntakeArtifact implements Action {
+public class IntakeArtifact_BACKUP implements Action {
     private boolean initialized = false;
     private boolean running = true;
     private boolean canceled = false;
@@ -22,7 +22,7 @@ public class IntakeArtifact implements Action {
     private Intake intake;
     private Spindexer spindexer;
 
-    public IntakeArtifact(Intake intake, Spindexer spindexer, boolean isAuto){
+    public IntakeArtifact_BACKUP(Intake intake, Spindexer spindexer, boolean isAuto){
         this.intake = intake;
         this.spindexer = spindexer;
         this.isAuto = isAuto;

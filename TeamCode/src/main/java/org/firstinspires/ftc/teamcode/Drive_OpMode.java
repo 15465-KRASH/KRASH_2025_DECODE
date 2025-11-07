@@ -118,6 +118,7 @@ public class Drive_OpMode extends LinearOpMode {
         double distance;
 
         boolean fieldRel = false;
+        boolean tasteTheRainbow = false;
 
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
@@ -264,8 +265,13 @@ public class Drive_OpMode extends LinearOpMode {
 
             if(runLift.getCurrentPress() && gamepad1.dpad_left){
                 m_robot.lift.runLift();
+                tasteTheRainbow = true;
             } else {
                 m_robot.lift.stopLift();
+            }
+
+            if(tasteTheRainbow && m_robot.lights != null){
+                m_robot.lights.rainbow();
             }
 
             if(intakeArtifact.newPress()){
