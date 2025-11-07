@@ -51,6 +51,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
+import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
@@ -132,7 +133,8 @@ public class Red_Far extends LinearOpMode {
         m_robot.limelight.pipelineSwitch(0);
         m_robot.limelight.start();
 
-        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, true);
+//        IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, true);
+        IntakeArtifactInOrder intakeAction = new IntakeArtifactInOrder(m_robot.intake, m_robot.spindexer, true);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
@@ -175,7 +177,7 @@ public class Red_Far extends LinearOpMode {
         m_robot.spindexer.initSpindexerforAuton();
 
         m_robot.spindexer.showSlots();
-        sleep(5000);
+//        sleep(5000);
 
         while (!isStarted() && !isStopRequested()) {
             if(m_robot.lights != null){
@@ -226,22 +228,24 @@ public class Red_Far extends LinearOpMode {
         Actions.runBlocking(shootAction);
 
         m_robot.shooter.setHood(0.25);
-        sleep(2000);
+//        sleep(2000);
         m_robot.shooter.setHood(0);
         telemetry.addData("First Shot Done:", 0);
         m_robot.spindexer.showSlots();
         telemetry.update();
-        sleep(5000);
+//        sleep(5000);
 
         Actions.runBlocking(new ParallelAction(
                 intakeAction,
                 pickupFirstAction
         ));
 
+        m_robot.spindexer.initSpindexer(0);
+
         m_robot.spindexer.showSlots();
         telemetry.addData("Shot Type: ", m_robot.spindexer.selectAShot(shootAction).toString());
         telemetry.update();
-        sleep(5000);
+//        sleep(5000);
 
         m_robot.shooter.setTargetSpeed(shooterRPM);
         m_robot.shooter.updateController();
@@ -252,15 +256,17 @@ public class Red_Far extends LinearOpMode {
         Actions.runBlocking(shootAction);
 
         m_robot.spindexer.showSlots();
-        sleep(5000);
+//        sleep(5000);
 
         Actions.runBlocking(new ParallelAction(
                 intakeAction,
                 pickupSecondAction
         ));
 
+        m_robot.spindexer.initSpindexer(1);
+
         m_robot.spindexer.showSlots();
-        sleep(5000);
+//        sleep(5000);
 
         Actions.runBlocking(finalPosAction);
 

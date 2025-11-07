@@ -24,6 +24,9 @@ public class ColorSensorCalibration extends LinearOpMode {
         ButtonState readLeft = new ButtonState(gamepad1, ButtonState.Button.x);
         ButtonState readRight = new ButtonState(gamepad1, ButtonState.Button.b);
 
+        ButtonState valUp = new ButtonState(gamepad1, ButtonState.Button.dpad_up);
+        ButtonState valDown = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
+
         NormalizedRGBA colors;
 
         waitForStart();
@@ -59,6 +62,16 @@ public class ColorSensorCalibration extends LinearOpMode {
             }
 
             telemetry.addData("Spindexer Pos", spindexer.getSpindexerPos());
+
+            float step = 5;
+
+            if(valUp.newPress()){
+                telemetry.addData("Gain: ", spindexer.incrementIntakeGain(step));
+            }
+
+            if(valDown.newPress()){
+                telemetry.addData("Gain: ", spindexer.decrementIntakeGain(step));
+            }
 
             spindexer.readIntakeHSV();
 

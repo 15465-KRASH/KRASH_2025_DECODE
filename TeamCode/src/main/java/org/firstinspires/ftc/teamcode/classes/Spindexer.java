@@ -174,6 +174,18 @@ public class Spindexer {
         return getDetectedColor(intakeSensor, telemetry);
     }
 
+    public float incrementIntakeGain(float increment){
+        float newVal = intakeSensor.getGain() + increment;
+        intakeSensor.setGain(newVal);
+        return increment;
+    }
+
+    public float decrementIntakeGain(float increment){
+        float newVal = intakeSensor.getGain() - increment;
+        intakeSensor.setGain(newVal);
+        return increment;
+    }
+
     public void rotate(int pose) {
         rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rotationMotor.setTargetPosition(pose);
@@ -203,6 +215,16 @@ public class Spindexer {
         spindexerSlots[0] = DetectedColor.PURPLE;
         spindexerSlots[1] = DetectedColor.PURPLE;
         spindexerSlots[2] = DetectedColor.GREEN;
+    }
+
+    public void initSpindexer(int greenPos){
+        for (int i = 0; i <= 2; i++) {
+            if(i==greenPos){
+                setSlotGreen(i);
+            } else {
+                setSlotPurple(i);
+            }
+        }
     }
 
     public DetectedColor getSlotColor(int x){
