@@ -115,7 +115,7 @@ public class Blue_Far extends LinearOpMode {
         Pose2d initialPose = new Pose2d(64, -15, Math.toRadians(180));
 //        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
-        Pose2d firstShot = new Pose2d(new Vector2d(58, -15), Math.toRadians(-160));
+        Pose2d firstShot = new Pose2d(new Vector2d(58, -15), Math.toRadians(-160.5));
 
         Pose2d startPickup = new Pose2d(new Vector2d(27, -26), Math.toRadians(-90));
         Pose2d finishPickup = new Pose2d(new Vector2d(27, -44), Math.toRadians(-90));

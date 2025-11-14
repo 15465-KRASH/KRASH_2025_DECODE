@@ -43,7 +43,7 @@ public class Spindexer {
 
     public double spinPwr = 0.5;
 
-    public double intakeDistLimit = 100;
+    public double intakeDistLimit = 95;
 
     public int[] intakeSpindexPos = {0, spindexerStep, -spindexerStep};
     public int[] shooterSpindexPos = {(int)Math.round(1.5*spindexerStep), (int)Math.round(-0.5*spindexerStep), (int)Math.round(0.5*spindexerStep)};
@@ -418,6 +418,11 @@ public class Spindexer {
     public void manualSpindexer(){
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rotationMotor.setPower(0.15);
+    }
+
+    public void manualInvertSpindexer(){
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotor.setPower(-0.15);
     }
 
     public void zeroSpindexer(){

@@ -32,7 +32,7 @@ public class ShootAllVariant implements Action {
     private double firstShotHoldMin = 1.0;
     private double firstShotWait = 0.75;
     private double secondShotWait = 0.75;
-    private double finalShotWait = 0.75;
+    private double finalShotWait = 1.0;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -136,12 +136,13 @@ public class ShootAllVariant implements Action {
                             targetSlot = spindexer.findFullShooterSlot(colorTarget);
                         }
                     } else {
-                        targetSlot = -1;
-                    }
-
-                    if(targetSlot == -1){
+//                        targetSlot = -1;
                         lastshot = true;
                     }
+
+//                    if(targetSlot == -1){
+//                        lastshot = true;
+//                    }
 
                     timer.reset();
                     waiting = true;

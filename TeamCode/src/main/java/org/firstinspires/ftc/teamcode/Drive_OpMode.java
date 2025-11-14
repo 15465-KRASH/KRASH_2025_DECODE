@@ -281,12 +281,12 @@ public class Drive_OpMode extends LinearOpMode {
                 intakeAction.cancel();
             }
 
-            if(scanIntake.newPress()){
-                scanAction.clearCancel();
-                runningActions.add(scanAction);
-            } else if (scanIntake.newRelease()){
-                scanAction.cancel();
-            }
+//            if(scanIntake.newPress()){
+//                scanAction.clearCancel();
+//                runningActions.add(scanAction);
+//            } else if (scanIntake.newRelease()){
+//                scanAction.cancel();
+//            }
 
             if(stopIntake.newPress()){
                 m_robot.spindexer.manualSpindexer();
@@ -303,6 +303,13 @@ public class Drive_OpMode extends LinearOpMode {
             if(zeroSpindexer.getCurrentPress()){
                 m_robot.spindexer.manualSpindexer();
             } else if (zeroSpindexer.newRelease()){
+                m_robot.spindexer.stop();
+                m_robot.spindexer.zeroSpindexer();
+            }
+
+            if(scanIntake.getCurrentPress()){
+                m_robot.spindexer.manualInvertSpindexer();
+            } else if (scanIntake.newRelease()){
                 m_robot.spindexer.stop();
                 m_robot.spindexer.zeroSpindexer();
             }
