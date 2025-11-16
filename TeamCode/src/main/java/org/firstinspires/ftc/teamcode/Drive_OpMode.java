@@ -48,6 +48,7 @@ import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState shootGreen = new ButtonState(gamepad2, ButtonState.Button.left_stick_button);
         ButtonState shootPurple = new ButtonState(gamepad2, ButtonState.Button.right_stick_button);
         ButtonState shootAny = new ButtonState(gamepad2, ButtonState.Button.left_bumper);
-        ButtonState scanIntake =new ButtonState(gamepad2, ButtonState.Button.back);
+        ButtonState scanIntake = new ButtonState(gamepad2, ButtonState.Button.back);
 
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
         ButtonState zeroSpindexer = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -164,6 +165,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState setRoboRel = new ButtonState(gamepad1, ButtonState.Button.x);
         ButtonState setFieldRel = new ButtonState(gamepad1, ButtonState.Button.b);
         ButtonState resetFieldRel = new ButtonState(gamepad1, ButtonState.Button.dpad_down);
+        ButtonState changeAlliance = new ButtonState(gamepad1, ButtonState.Button.back);
 
 
         int shooterPos = 0;
@@ -198,23 +200,32 @@ public class Drive_OpMode extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            telemetry.addData("Alliance Color: ", MatchInfo.allianceColor.toString());
+
+            //Update custom PID here
             m_robot.shooter.updateController();
 
+            //Update limelight tag distance if visible
+            targetInfo = m_robot.getTargetTagInfo();
+            distance = targetInfo.targetDistance;
+            shootAction.setShotOrder(MatchInfo.patternGreenPos - 21);
+
+
             //m_robot.limelight.updateRobotOrientation(m_robot.drive.localizer.)
-            llResult = m_robot.limelight.getLatestResult();
-            if (llResult != null) {
-                if (llResult.isValid()) {
-                    // Access AprilTag results
-                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                        telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                    }
-                } else {
-                    telemetry.addData("Result not valid", 0);
-                }
-            } else {
-                telemetry.addData("Limelight is Null", 0);
-            }
+//            llResult = m_robot.limelight.getLatestResult();
+//            if (llResult != null) {
+//                if (llResult.isValid()) {
+//                    // Access AprilTag results
+//                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+//                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+//                        telemetry.addData("AprilTag", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
+//                    }
+//                } else {
+//                    telemetry.addData("Result not valid", 0);
+//                }
+//            } else {
+//                telemetry.addData("Limelight is Null", 0);
+//            }
 
             // Drive Code
             if (gamepad1.right_bumper) {
@@ -245,16 +256,14 @@ public class Drive_OpMode extends LinearOpMode {
                 input = m_robot.rotatedVector(input, -m_robot.drive.localizer.getPose().heading.toDouble());
             }
 
-            targetInfo = m_robot.getAprilTagInfo();
 
-            distance = targetInfo.targetDistance;
 
             telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
             telemetry.addData("Distance to Target: ", distance);
 
             double rotation = Math.pow(-gamepad1.right_stick_x, 3) * powerScale;
 
-            if (alignToGoal.getCurrentPress() && llResult != null) {
+            if (alignToGoal.getCurrentPress() && targetInfo.tagID != 0) {
                 double offset = targetInfo.targetXDegrees;
                 rotation = -0.03 * offset;
             }
@@ -268,6 +277,10 @@ public class Drive_OpMode extends LinearOpMode {
                 tasteTheRainbow = true;
             } else {
                 m_robot.lift.stopLift();
+            }
+
+            if (changeAlliance.newPress()) {
+                MatchInfo.swapAllianceColor();
             }
 
             if(tasteTheRainbow && m_robot.lights != null){

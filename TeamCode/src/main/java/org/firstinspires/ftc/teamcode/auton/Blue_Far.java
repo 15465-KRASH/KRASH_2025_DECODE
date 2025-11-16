@@ -55,6 +55,7 @@ import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -171,6 +172,7 @@ public class Blue_Far extends LinearOpMode {
 
 
         // Wait for the game to start (driver presses START)
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.BLUE);
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
@@ -212,6 +214,7 @@ public class Blue_Far extends LinearOpMode {
         if(tagID <21 || tagID >23){
             tagID = 21;
         }
+        MatchInfo.patternGreenPos = tagID - 21;
 
         shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);

@@ -8,6 +8,7 @@ import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.arcrobotics.ftclib.util.InterpLUT;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -59,7 +60,10 @@ public class Shooter {
     public ShooterSettings farShot = new ShooterSettings(2.0,0, 3250);
     public ShooterSettings topOfTheKey = new ShooterSettings(1.25,0.25, 2850);
     public ShooterSettings belowTheKey = new ShooterSettings(1.0,0.25, 2600);
-    
+
+    InterpLUT shooterSpeedTable = new InterpLUT();
+    InterpLUT shooterHoodTable = new InterpLUT();
+
     ShooterSettings[] settingsArray = {reallyfarShot, farShot, topOfTheKey, belowTheKey};
     
     public static final int ticksPerRev = 28;
@@ -91,6 +95,15 @@ public class Shooter {
         loader.setDirection(DcMotorSimple.Direction.REVERSE);
         hood = hardwareMap.get(Servo.class, "hood");
         hood.setDirection(Servo.Direction.REVERSE);
+
+        //Setup Shooter Tables
+        for (ShooterSettings set : settingsArray){
+            shooterSpeedTable.add(set.minDistance, set.rpm);
+            shooterHoodTable.add(set.minDistance, set.hoodPos);
+        }
+        shooterSpeedTable.createLUT();
+        shooterHoodTable.createLUT();
+
 
         hood.setPosition(0);
     }
@@ -189,22 +202,29 @@ public class Shooter {
         motorController = new PIDEx(pidExCoeff);
         motorFFController = new BasicFeedforward(ffCoeff);
     }
-    
-    public void setupShooter(double distance){
-        if(distance == 0){
-            setHood(settingsArray[2].hoodPos);
-            setTargetSpeed(settingsArray[2].rpm);
-            return;
+
+    public void setupShooter(double distance) {
+//        if(distance == 0){
+//            setHood(settingsArray[2].hoodPos);
+//            setTargetSpeed(settingsArray[2].rpm);
+//            return;
+//        }
+//        for (ShooterSettings setting: settingsArray) {
+//            if(distance > setting.minDistance){
+//                setHood(setting.hoodPos);
+//                setTargetSpeed(setting.rpm);
+//                return;
+//            }
+        if (distance < 0.5) {
+            setHood(shooterHoodTable.get(2.4));
+            setTargetSpeed((int) shooterSpeedTable.get(2.4));
+        } else {
+            setHood(shooterHoodTable.get(distance));
+            setTargetSpeed((int) shooterSpeedTable.get(distance));
         }
-        for (ShooterSettings setting: settingsArray) {
-            if(distance > setting.minDistance){
-                setHood(setting.hoodPos);
-                setTargetSpeed(setting.rpm);
-                return;
-            }
-        }
-        setHood(settingsArray[settingsArray.length - 1].hoodPos);
-        setTargetSpeed(settingsArray[settingsArray.length - 1].rpm);
+
+//        setHood(settingsArray[settingsArray.length - 1].hoodPos);
+//        setTargetSpeed(settingsArray[settingsArray.length - 1].rpm);
     }
 
 }

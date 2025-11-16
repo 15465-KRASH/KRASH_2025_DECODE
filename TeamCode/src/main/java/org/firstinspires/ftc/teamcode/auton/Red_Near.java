@@ -53,6 +53,7 @@ import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,6 +173,7 @@ public class Red_Near extends LinearOpMode {
 
 
         // Wait for the game to start (driver presses START)
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
@@ -215,6 +217,7 @@ public class Red_Near extends LinearOpMode {
                 m_robot.updateLimelight()));
         sleep(500);
         tagID = m_robot.getTargetInfo().tagID;
+        MatchInfo.patternGreenPos = tagID - 21;
         shootAction.setShotOrder(tagID - 21);
         sleep(1000);
         telemetry.addData("Tag ID: ", tagID);

@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Lift;
 import org.firstinspires.ftc.teamcode.classes.Lights;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 import org.firstinspires.ftc.teamcode.classes.Shooter;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
@@ -96,6 +97,25 @@ public class Robot {
             }
         }
         return new TargetInfo();
+    }
+
+    public TargetInfo getTargetTagInfo() {
+        LLResult llResult;
+        llResult = limelight.getLatestResult();
+        if (llResult != null) {
+            if (llResult.isValid()) {
+                // Access AprilTag results
+                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    if (fr.getFiducialId() == MatchInfo.targetTag) {
+                        targetInfo = new TargetInfo(fr);
+                        return targetInfo;
+                    }
+                }
+            }
+        }
+        targetInfo.tagID = 0;
+        return targetInfo;
     }
 
     public TargetInfo getObeliskInfo() {

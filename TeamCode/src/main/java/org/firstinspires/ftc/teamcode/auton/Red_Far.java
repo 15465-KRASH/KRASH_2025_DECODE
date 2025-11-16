@@ -55,6 +55,7 @@ import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,7 +114,7 @@ public class Red_Far extends LinearOpMode {
         LLResult llResult;
 
         Pose2d initialPose = new Pose2d(64, 15, Math.toRadians(180));
-//        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
+        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
         Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
 
@@ -172,6 +173,7 @@ public class Red_Far extends LinearOpMode {
 
 
         // Wait for the game to start (driver presses START)
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
@@ -216,6 +218,8 @@ public class Red_Far extends LinearOpMode {
         if(tagID <21 || tagID >23){
             tagID = 21;
         }
+
+        MatchInfo.patternGreenPos = tagID - 21;
 
         shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
