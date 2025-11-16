@@ -96,13 +96,13 @@ public class Shooter {
         hood = hardwareMap.get(Servo.class, "hood");
         hood.setDirection(Servo.Direction.REVERSE);
 
-        //Setup Shooter Tables
-        for (ShooterSettings set : settingsArray){
-            shooterSpeedTable.add(set.minDistance, set.rpm);
-            shooterHoodTable.add(set.minDistance, set.hoodPos);
-        }
-        shooterSpeedTable.createLUT();
-        shooterHoodTable.createLUT();
+//        //Setup Shooter Tables
+//        for (ShooterSettings set : settingsArray){
+//            shooterSpeedTable.add(set.minDistance, set.rpm);
+//            shooterHoodTable.add(set.minDistance, set.hoodPos);
+//        }
+//        shooterSpeedTable.createLUT();
+//        shooterHoodTable.createLUT();
 
 
         hood.setPosition(0);

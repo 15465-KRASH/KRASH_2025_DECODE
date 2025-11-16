@@ -25,7 +25,7 @@ public class Lights {
         this.telemetry = telemetry;
 
         leftLight = hardwareMap.get(Servo.class, "leftLight");
-        rightLight = hardwareMap.get(Servo.class, "rightLight");
+        rightLight = hardwareMap.get(Servo.class, "leftLight");
 
         timer.reset();
     }
@@ -71,6 +71,7 @@ public class Lights {
             rainbowDirection = false;
             rainbowSetting = 0.722;
         }
+//        setYellow();
     }
 
 

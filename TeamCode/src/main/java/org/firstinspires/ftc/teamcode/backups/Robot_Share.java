@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.backups;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +12,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Lift;
 import org.firstinspires.ftc.teamcode.classes.Lights;
@@ -21,19 +22,12 @@ import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
 import java.util.List;
 
-public class Robot {
+public class Robot_Share {
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
 
     public MecanumDrive drive;
-    public Lift lift;
-    public Shooter shooter;
-    public Intake intake;
-    public Spindexer spindexer;
     public Limelight3A limelight;
-    public Lights lights = null;
-
-    public boolean lightsInstalled = true;
 
 
 
@@ -62,24 +56,16 @@ public class Robot {
 
     }
 
-    public TargetInfo targetInfo = new TargetInfo();
+    public TargetInfo targetInfo;
 
 
-    public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
+    public Robot_Share(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
         drive = new MecanumDrive(hardwareMap, pose);
-        lift = new Lift(hardwareMap, telemetry);
-        shooter = new Shooter(hardwareMap, telemetry);
-        intake = new Intake(hardwareMap, telemetry);
-        spindexer = new Spindexer(hardwareMap, telemetry);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        if(lightsInstalled){
-            lights = new Lights(hardwareMap,telemetry);
-            lights.setYellow();
-        }
     }
 
     public TargetInfo getAprilTagInfo() {

@@ -119,7 +119,7 @@ public class Drive_OpMode extends LinearOpMode {
         double distance;
 
         boolean fieldRel = false;
-        boolean tasteTheRainbow = false;
+        boolean tasteTheRainbow = true;
 
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
