@@ -64,7 +64,7 @@ public class Shooter {
     InterpLUT shooterSpeedTable = new InterpLUT();
     InterpLUT shooterHoodTable = new InterpLUT();
 
-    ShooterSettings[] settingsArray = {reallyfarShot, farShot, topOfTheKey, belowTheKey};
+    ShooterSettings[] settingsArray = {belowTheKey, topOfTheKey, farShot, reallyfarShot};
     
     public static final int ticksPerRev = 28;
     public int targetRPM = 0;
@@ -97,12 +97,12 @@ public class Shooter {
         hood.setDirection(Servo.Direction.REVERSE);
 
 //        //Setup Shooter Tables
-//        for (ShooterSettings set : settingsArray){
-//            shooterSpeedTable.add(set.minDistance, set.rpm);
-//            shooterHoodTable.add(set.minDistance, set.hoodPos);
-//        }
-//        shooterSpeedTable.createLUT();
-//        shooterHoodTable.createLUT();
+        for (ShooterSettings set : settingsArray){
+            shooterSpeedTable.add(set.minDistance, set.rpm);
+            shooterHoodTable.add(set.minDistance, set.hoodPos);
+        }
+        shooterSpeedTable.createLUT();
+        shooterHoodTable.createLUT();
 
 
         hood.setPosition(0);
@@ -204,6 +204,7 @@ public class Shooter {
     }
 
     public void setupShooter(double distance) {
+//        *** settingsArray has been reversed. Need to switch it back to use this commented code.
 //        if(distance == 0){
 //            setHood(settingsArray[2].hoodPos);
 //            setTargetSpeed(settingsArray[2].rpm);

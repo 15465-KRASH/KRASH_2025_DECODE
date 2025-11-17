@@ -110,8 +110,9 @@ public class Spindexer_PIDFEx extends LinearOpMode {
 
         Robot m_robot = new Robot(hardwareMap, telemetry, new Pose2d(0, 0, 0));
 
-        ButtonState spinUp = new ButtonState(gamepad1, ButtonState.Button.right_bumper);
-        ButtonState spinDown = new ButtonState(gamepad1, ButtonState.Button.left_bumper);
+        ButtonState pos0 = new ButtonState(gamepad1, ButtonState.Button.x);
+        ButtonState pos1 = new ButtonState(gamepad1, ButtonState.Button.y);
+        ButtonState pos2 = new ButtonState(gamepad1, ButtonState.Button.b);
         ButtonState setVals = new ButtonState(gamepad1, ButtonState.Button.a);
 //        ButtonState shoot = new ButtonState(gamepad1, ButtonState.Button.right_trigger);
 
@@ -137,16 +138,19 @@ public class Spindexer_PIDFEx extends LinearOpMode {
         waitForStart();
 
         while(opModeIsActive()){
-            m_robot.shooter.updateController();
+            m_robot.spindexer.updateController();
 
             pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
             ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
 
-            if(spinUp.newPress()){
-                m_robot.shooter.spinUp(targetRPM);
+            if(pos0.newPress()){
+                m_robot.spindexer.moveToIntakePos(0);
             }
-            if(spinDown.newPress()){
-                m_robot.shooter.idle();
+            if(pos1.newPress()){
+                m_robot.spindexer.moveToIntakePos(1);
+            }
+            if(pos2.newPress()){
+                m_robot.spindexer.moveToIntakePos(2);
             }
             if(setVals.newPress()){
                 m_robot.shooter.setPIDFExCoeeficients(pidExCoeff, ffCoeff);
@@ -159,14 +163,14 @@ public class Spindexer_PIDFEx extends LinearOpMode {
 //            }
 
             telemetry.addData("Setpoint:", targetRPM);
-            telemetry.addData("Velocity:", 60 * m_robot.shooter.getSpeed() / m_robot.shooter.ticksPerRev);
+            telemetry.addData("Current Location:", m_robot.spindexer.getSpindexerPos());
             telemetry.addData("Kp:", Kp);
             telemetry.addData("Ki:", Ki);
             telemetry.addData("Kd:", Kd);
-            telemetry.addData("Kv:", Kv);
-            telemetry.addData("Ka:", Ka);
-            telemetry.addData("Ks:", Ks);
-            telemetry.addData("targetAccelTime:", targetAccelTime);
+//            telemetry.addData("Kv:", Kv);
+//            telemetry.addData("Ka:", Ka);
+//            telemetry.addData("Ks:", Ks);
+//            telemetry.addData("targetAccelTime:", targetAccelTime);
             telemetry.update();
 
         }

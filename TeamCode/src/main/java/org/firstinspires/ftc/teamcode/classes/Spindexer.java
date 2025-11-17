@@ -2,6 +2,13 @@ package org.firstinspires.ftc.teamcode.classes;
 
 import android.graphics.Color;
 
+import androidx.annotation.NonNull;
+
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.PIDEx;
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
+import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
+import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -12,6 +19,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -20,11 +28,28 @@ import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
 public class Spindexer {
     private HardwareMap hardwareMap;
     private Telemetry telemetry;
-    private Spindexer spindexer;
 
     public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
     public PIDFCoefficients pidfCoefficients;
     public PIDFCoefficients pidfCoefficientsClose;
+
+    //PIDEx Setup
+    public static double Kp = 0;
+    public static double Ki = 0;
+    public static double Kd = 0;
+    public static double Kv = 0; //1.1;
+    public static double Ka = 0; //0.2;
+    public static double Ks = 0; //0.001;
+    public static double targetAccelTime = 0; //seconds
+
+    PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
+    PIDEx motorController = new PIDEx(pidExCoeff);
+
+//    Probably don't need FF
+//    FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
+//    BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
+
+
     /*
     * intakeSensor - Control Hub I2C Port 3
     * leftSensor - Expansion Hub I2C Port 3
@@ -76,14 +101,15 @@ public class Spindexer {
 //        rotationMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        pidfCoefficients =  rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        pidfCoefficients.p = 7.5;
-        pidfCoefficients.i = 1.5;
-        pidfCoefficients.d = 0.5;
-        setPIDF(pidfCoefficients);
-        pidfCoefficientsClose = pidfCoefficients;
-        pidfCoefficientsClose.p = 15;
+//        pidfCoefficients =  rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
+//        pidfCoefficients.p = 7.5;
+//        pidfCoefficients.i = 1.5;
+//        pidfCoefficients.d = 0.5;
+//        setPIDF(pidfCoefficients);
+//        pidfCoefficientsClose = pidfCoefficients;
+//        pidfCoefficientsClose.p = 15;
 
 
 
@@ -197,20 +223,6 @@ public class Spindexer {
         rotationMotor.setPower(0);
     }
 
-    public void rotateAfterPickup() {
-        if (spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.PURPLE || spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.GREEN) {
-            spindexer.rotate(60);
-            pickedUp = true;
-        }
-        if (pickedUp == true && spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.PURPLE || spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.GREEN) {
-            spindexer.stop();
-            pickedUp = false;
-        } else if (pickedUp == true && spindexer.getDetectedColor(intakeSensor, telemetry) == DetectedColor.NONE) {
-            spindexer.stop();
-            pickedUp = false;
-        }
-    }
-
     public void initSpindexerforAuton(){
         spindexerSlots[0] = DetectedColor.PURPLE;
         spindexerSlots[1] = DetectedColor.PURPLE;
@@ -236,9 +248,11 @@ public class Spindexer {
     }
 
     public void runSpindexerPos(int pos, double pwr){
+        //Use motor TargetPosition to hold position even with custom PID
+        //Maintains compatibility with old method
         rotationMotor.setTargetPosition(pos);
-        rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rotationMotor.setPower(pwr);
+//        rotationMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rotationMotor.setPower(pwr);
     }
 
     public void stopSpindexer(){
@@ -467,6 +481,32 @@ public class Spindexer {
                     .addData("] ->", getSlotColor(x).name());
         }
 //        telemetry.update();
+    }
+
+    public void updateController(){
+        rotationMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double targetPos = rotationMotor.getTargetPosition();
+        double currentPos = getSpindexerPos();
+        double pidOutput = motorController.calculate(targetPos, currentPos);
+//        double ffOutput = motorFFController.calculate(0, rotationMotor, targetAccel);
+        rotationMotor.setPower(Range.clip(pidOutput, -1.0, 1.0));
+
+//        telemetry.addData("currentSpeed: ", currentSpeed);
+//        telemetry.addData("targetSpeed: ", targetSpeed);
+//        telemetry.addData("targetAccel: ", targetAccel);
+//        telemetry.addData("pidOutput: ", pidOutput);
+//        telemetry.addData("ffoutput: ", ffOutput);
+    }
+    public Action updateSpindexer() {
+        return new Action() {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                updateController();
+                return true;
+            }
+        };
     }
 
 }
