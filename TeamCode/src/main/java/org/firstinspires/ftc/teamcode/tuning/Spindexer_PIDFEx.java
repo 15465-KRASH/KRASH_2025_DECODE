@@ -64,7 +64,7 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 @Config
-@Disabled
+//@Disabled
 @TeleOp(name = "Spindexer PIDF_Ex", group = "Tuning")
 //@Disabled
 public class Spindexer_PIDFEx extends LinearOpMode {
@@ -153,7 +153,8 @@ public class Spindexer_PIDFEx extends LinearOpMode {
                 m_robot.spindexer.moveToIntakePos(2);
             }
             if(setVals.newPress()){
-                m_robot.shooter.setPIDFExCoeeficients(pidExCoeff, ffCoeff);
+                m_robot.spindexer.setPIDFExCoeeficients(pidExCoeff);
+                m_robot.spindexer.Ks = this.Ks;
             }
 
 //            if(shoot.getCurrentPress()){
@@ -162,14 +163,14 @@ public class Spindexer_PIDFEx extends LinearOpMode {
 //                m_robot.shooter.loadArtifact(0);
 //            }
 
-            telemetry.addData("Setpoint:", targetRPM);
+            telemetry.addData("Setpoint:", m_robot.spindexer.rotationMotor.getTargetPosition());
             telemetry.addData("Current Location:", m_robot.spindexer.getSpindexerPos());
             telemetry.addData("Kp:", Kp);
             telemetry.addData("Ki:", Ki);
             telemetry.addData("Kd:", Kd);
 //            telemetry.addData("Kv:", Kv);
 //            telemetry.addData("Ka:", Ka);
-//            telemetry.addData("Ks:", Ks);
+            telemetry.addData("Ks:", Ks);
 //            telemetry.addData("targetAccelTime:", targetAccelTime);
             telemetry.update();
 

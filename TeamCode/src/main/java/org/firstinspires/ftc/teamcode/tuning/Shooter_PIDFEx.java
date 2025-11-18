@@ -134,6 +134,7 @@ public class Shooter_PIDFEx extends LinearOpMode {
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
+        m_robot.spindexer.resetPos();
         m_robot.shooter.idle();
 
 

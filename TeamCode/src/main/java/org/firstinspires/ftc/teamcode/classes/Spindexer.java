@@ -34,12 +34,12 @@ public class Spindexer {
     public PIDFCoefficients pidfCoefficientsClose;
 
     //PIDEx Setup
-    public static double Kp = 0;
+    public static double Kp = 0.005;
     public static double Ki = 0;
     public static double Kd = 0;
     public static double Kv = 0; //1.1;
     public static double Ka = 0; //0.2;
-    public static double Ks = 0; //0.001;
+    public static double Ks = 0.15; //0.001;
     public static double targetAccelTime = 0; //seconds
 
     PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
@@ -489,7 +489,9 @@ public class Spindexer {
         double currentPos = getSpindexerPos();
         double pidOutput = motorController.calculate(targetPos, currentPos);
 //        double ffOutput = motorFFController.calculate(0, rotationMotor, targetAccel);
-        rotationMotor.setPower(Range.clip(pidOutput, -1.0, 1.0));
+        rotationMotor.setPower(Range.clip(pidOutput + calcKs(), -1.0, 1.0));
+
+        telemetry.addData("Output: ", Range.clip(pidOutput + calcKs(), -1.0, 1.0));
 
 //        telemetry.addData("currentSpeed: ", currentSpeed);
 //        telemetry.addData("targetSpeed: ", targetSpeed);
@@ -507,6 +509,28 @@ public class Spindexer {
                 return true;
             }
         };
+    }
+
+    public void setPIDFExCoeeficients(PIDCoefficientsEx pidExCoeff){
+        motorController = new PIDEx(pidExCoeff);
+//        motorFFController = new BasicFeedforward(ffCoeff);
+    }
+
+    public void resetPos(){
+        rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotationMotor.setTargetPosition(0);
+    }
+
+    public double calcKs(){
+        int sensitivity = 3;
+        int error = rotationMotor.getCurrentPosition() - rotationMotor.getTargetPosition();
+        if(error > sensitivity){
+            return -Ks;
+        } else if(error < -sensitivity){
+            return Ks;
+        } else {
+            return 0;
+        }
     }
 
 }
