@@ -33,9 +33,11 @@ import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.AccelConstraint;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
@@ -46,11 +48,14 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
+import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +74,7 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Red_Far_Backup", group = "Comp")
+@Autonomous(name = "Red_Far", group = "Comp")
 @Disabled
 public class Red_Far_Backup extends LinearOpMode {
 
@@ -99,6 +104,8 @@ public class Red_Far_Backup extends LinearOpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
 
+        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+
         int tagID = 0;
         int shooterRPM = 3250;
 
@@ -108,9 +115,9 @@ public class Red_Far_Backup extends LinearOpMode {
         LLResult llResult;
 
         Pose2d initialPose = new Pose2d(64, 15, Math.toRadians(180));
-//        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
+        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
-        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160));
+        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
 
         Pose2d startPickup = new Pose2d(new Vector2d(35, 19), Math.toRadians(90));
         Pose2d finishPickup = new Pose2d(new Vector2d(35, 39), Math.toRadians(90));
@@ -119,8 +126,10 @@ public class Red_Far_Backup extends LinearOpMode {
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 39), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
+        Pose2d parkHighPos = new Pose2d(new Vector2d(50, 26), Math.toRadians(160.5));
 
-        TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
+        TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(10);
+        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-20, 2);
 
         Robot m_robot = new Robot(hardwareMap, telemetry, initialPose);
 
@@ -141,8 +150,13 @@ public class Red_Far_Backup extends LinearOpMode {
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToSplineHeading(startPickup, Math.toRadians(90))
-                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint);
+                .splineTo(startPickup.position, Math.toRadians(90))
+                .splineTo(finishPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+
+//        TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
+//                .setTangent(Math.toRadians(180))
+//                .splineToSplineHeading(startPickup, Math.toRadians(90))
+//                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
 
         Action pickupFirstAction = pickupFirst.build();
 
@@ -154,8 +168,13 @@ public class Red_Far_Backup extends LinearOpMode {
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
-                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), pickupVelConstraint);
+                .splineTo(start2ndPickup.position, Math.toRadians(90))
+                .splineTo(finish2ndPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+
+//        TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
+//                .setTangent(Math.toRadians(180))
+//                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
+//                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
 
         Action pickupSecondAction = pickupSecond.build();
 
@@ -167,9 +186,14 @@ public class Red_Far_Backup extends LinearOpMode {
 
 
         // Wait for the game to start (driver presses START)
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
+
+        if(m_robot.lights != null){
+            m_robot.lights.setYellow();
+        }
 
         m_robot.spindexer.showSlots();
 //        sleep(5000);
@@ -189,28 +213,30 @@ public class Red_Far_Backup extends LinearOpMode {
                     }
                 }
             }
-        }
 
-        if(m_robot.lights != null){
-            m_robot.lights.setYellow();
-        }
-
-        llResult = m_robot.limelight.getLatestResult();
-        if (llResult != null) {
-            if (llResult.isValid()) {
-                // Access AprilTag results
-                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
-                        tagID = fr.getFiducialId();
+            llResult = m_robot.limelight.getLatestResult();
+            if (llResult != null) {
+                if (llResult.isValid()) {
+                    // Access AprilTag results
+                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                        if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
+                            tagID = fr.getFiducialId();
+                        }
                     }
                 }
             }
         }
 
+    timer.reset();
+
+
+
         if(tagID <21 || tagID >23){
             tagID = 21;
         }
+
+        MatchInfo.patternGreenPos = tagID - 21;
 
         shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
@@ -222,9 +248,9 @@ public class Red_Far_Backup extends LinearOpMode {
                 m_robot.shooter.updateFlywheel()));
         Actions.runBlocking(shootAction);
 
-        m_robot.shooter.setHood(0.25);
-//        sleep(2000);
-        m_robot.shooter.setHood(0);
+//        m_robot.shooter.setHood(0.25);
+////        sleep(2000);
+//        m_robot.shooter.setHood(0);
         telemetry.addData("First Shot Done:", 0);
         m_robot.spindexer.showSlots();
         telemetry.update();

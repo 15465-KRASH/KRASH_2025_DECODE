@@ -250,8 +250,6 @@ public class Drive_OpMode extends LinearOpMode {
 
             m_robot.drive.localizer.update();
 
-            telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
-
             if(fieldRel){
                 input = m_robot.rotatedVector(input, -m_robot.drive.localizer.getPose().heading.toDouble());
             }

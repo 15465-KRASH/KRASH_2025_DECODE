@@ -93,6 +93,9 @@ public class IntakeArtifact implements Action {
         running = false;
         intake.stop();
         initialized = false;
+        if(!isAuto) {
+            spindexer.moveToShooterPos(0);
+        }
     }
 
     public void clearCancel(){
