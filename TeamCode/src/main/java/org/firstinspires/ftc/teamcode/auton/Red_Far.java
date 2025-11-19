@@ -118,13 +118,15 @@ public class Red_Far extends LinearOpMode {
 
         LLResult llResult;
 
+        double shotAngle = 160.5;
+
+//        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
         Pose2d initialPose = new Pose2d(64, 15, Math.toRadians(180));
-        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
-        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
+        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(shotAngle));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(36, 19), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(36, 39), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(36, 30), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(36, 42), Math.toRadians(90));
 
         Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 39), Math.toRadians(90));
@@ -133,7 +135,9 @@ public class Red_Far extends LinearOpMode {
         Pose2d parkHighPos = new Pose2d(new Vector2d(50, 26), Math.toRadians(160.5));
 
         TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
-        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-30, 1.5);
+        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-50, 10);
+
+        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
         Robot m_robot = new Robot(hardwareMap, telemetry, initialPose);
 
@@ -147,33 +151,32 @@ public class Red_Far extends LinearOpMode {
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
         TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(180))
                 .lineToXLinearHeading(firstShot.position.x, firstShot.heading);
+
+//        TrajectoryActionBuilder firstShotTraj = myBot.getDrive().actionBuilder(initialPose)
+//                .splineTo(new Vector2d(48, 48), Math.toRadians(90));
 
         Action firstShotAction = firstShotTraj.build();
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
-                .splineToSplineHeading(startPickup, Math.toRadians(90))
-                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint);
-
-//        TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-//                .setTangent(Math.toRadians(180))
-//                .splineToSplineHeading(startPickup, Math.toRadians(90))
-//                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+                .setTangent(Math.toRadians(shotAngle))
+                .splineTo(startPickup.position, Math.toRadians(90))
+                .splineTo(new Vector2d(startPickup.position.x, startPickup.position.y + 2), Math.toRadians(90), pickupVelConstraint)
+                .splineTo(finishPickup.position, Math.toRadians(90), new TranslationalVelConstraint(50), pickupAccelConstraint);
 
         Action pickupFirstAction = pickupFirst.build();
 
         TrajectoryActionBuilder shootSecondTraj = pickupFirst.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(firstShot, Math.toRadians(160) - Math.toRadians(180));
+                .splineToLinearHeading(firstShot, Math.toRadians(shotAngle) - Math.toRadians(180));
 
         Action shootSecondAction = shootSecondTraj.build();
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(160.5))
+                .setTangent(Math.toRadians(shotAngle))
                 .splineTo(start2ndPickup.position, Math.toRadians(90))
-                .splineTo(finish2ndPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+                .splineTo(new Vector2d(start2ndPickup.position.x, start2ndPickup.position.y + 2), Math.toRadians(90), pickupVelConstraint)
+                .splineTo(finish2ndPickup.position, Math.toRadians(90), new TranslationalVelConstraint(50), pickupAccelConstraint);
 
 //        TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
 //                .setTangent(Math.toRadians(180))
@@ -187,6 +190,8 @@ public class Red_Far extends LinearOpMode {
                 .splineToLinearHeading(finalPos, Math.toRadians(179.9));
 
         Action finalPosAction = finalPosTraj.build();
+
+        //Third shot here
 
 
         // Wait for the game to start (driver presses START)
