@@ -280,7 +280,7 @@ public class Drive_OpMode extends LinearOpMode {
             m_robot.drive.setDrivePowers(driveControl);
 
             if(runLift.getCurrentPress() && gamepad1.dpad_left){
-                m_robot.lift.runLift();
+                m_robot.lift.runLiftBalanced();
                 tasteTheRainbow = true;
             } else {
                 m_robot.lift.stopLift();

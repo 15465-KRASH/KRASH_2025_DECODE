@@ -71,6 +71,35 @@ public class Lift {
 
     }
 
+    public void runLiftBalanced() {
+
+        double balanceFactor = 0.0002;
+
+        leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        int leftPos = leftClimbMotor.getCurrentPosition();
+        int rightPos = rightClimbMotor.getCurrentPosition();
+
+        int diff = leftPos - rightPos;
+
+        telemetry.addData("Lift Correction: ", diff * balanceFactor);
+
+        if(leftPos < liftTarget){
+            leftClimbMotor.setPower(0.6 - balanceFactor*diff);
+        }
+        else {
+            leftClimbMotor.setPower(0);
+        }
+
+        if(rightPos < liftTarget){
+            rightClimbMotor.setPower(0.6 + balanceFactor*diff);
+        } else {
+            rightClimbMotor.setPower(0);
+        }
+
+    }
+
     public void stopLift() {
         leftClimbMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightClimbMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
