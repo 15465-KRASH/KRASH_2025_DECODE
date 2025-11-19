@@ -10,6 +10,7 @@ import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -34,16 +35,17 @@ public class Spindexer {
     public PIDFCoefficients pidfCoefficientsClose;
 
     //PIDEx Setup
-    public static double Kp = 0.005;
+    public static double Kp = 0.006;
     public static double Ki = 0;
     public static double Kd = 0;
     public static double Kv = 0; //1.1;
     public static double Ka = 0; //0.2;
-    public static double Ks = 0.15; //0.001;
+    public static double Ks = 0.18; //0.001;
     public static double targetAccelTime = 0; //seconds
 
     PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
     PIDEx motorController = new PIDEx(pidExCoeff);
+    AnalogInput gobildaSensor;
 
 //    Probably don't need FF
 //    FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
@@ -64,7 +66,7 @@ public class Spindexer {
     public int maxSpindexerRot = 5;
     public int rot = 3*spindexerStep;
     public int spindexerInitialTol = 10;
-    public int spindexerFinalTol = 5;
+    public int spindexerFinalTol = 2;
 
     public double spinPwr = 0.5;
 
@@ -96,6 +98,8 @@ public class Spindexer {
 
         leftSensor = hardwareMap.get(NormalizedColorSensor.class, "leftSensor");
         rightSensor = hardwareMap.get(NormalizedColorSensor.class, "rightSensor");
+
+        gobildaSensor = hardwareMap.get(AnalogInput.class, "gobildaSensor");
 
         rotationMotor = hardwareMap.get(DcMotorEx.class, "spindexerRotationMotor");
 //        rotationMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -402,18 +406,23 @@ public class Spindexer {
         return distanceIntakeSensor.getDistance(DistanceUnit.MM) < intakeDistLimit;
     }
 
+    public boolean isGobildaIntakeSlotFull(){
+        return gobildaSensor.getVoltage() < 0.3;
+    }
+
     public boolean spindexerAtTarget(){
         int currentTarget = rotationMotor.getTargetPosition();
         int tol = Math.abs(currentTarget - rotationMotor.getCurrentPosition());
+        telemetry.addData("Spindexer Tol: ", tol);
         boolean done = false;
-        if(tol < spindexerInitialTol){
-            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficientsClose);
-            runSpindexerPos(currentTarget, spinPwr);
-        }
+//        if(tol < spindexerInitialTol){
+//            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficientsClose);
+//            runSpindexerPos(currentTarget, spinPwr);
+//        }
         done = tol <= spindexerFinalTol;
-        if(done){
-            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficients);
-        }
+//        if(done){
+//            rotationMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfCoefficients);
+//        }
         return done;
     }
 
@@ -522,7 +531,7 @@ public class Spindexer {
     }
 
     public double calcKs(){
-        int sensitivity = 3;
+        int sensitivity = 1;
         int error = rotationMotor.getCurrentPosition() - rotationMotor.getTargetPosition();
         if(error > sensitivity){
             return -Ks;

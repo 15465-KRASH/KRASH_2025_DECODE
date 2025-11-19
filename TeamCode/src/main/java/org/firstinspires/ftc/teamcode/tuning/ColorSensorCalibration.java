@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.tuning;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
@@ -16,9 +18,13 @@ public class ColorSensorCalibration extends LinearOpMode {
     Spindexer spindexer;
     Spindexer.DetectedColor detectedColor;
 
+    AnalogInput gobildaSensor;
+
     @Override
     public void runOpMode() throws InterruptedException {
         spindexer  = new Spindexer(hardwareMap, telemetry);
+
+        gobildaSensor = hardwareMap.get(AnalogInput.class, "gobildaSensor");
 
         ButtonState readIntake = new ButtonState(gamepad1, ButtonState.Button.a);
         ButtonState readLeft = new ButtonState(gamepad1, ButtonState.Button.x);
@@ -64,6 +70,7 @@ public class ColorSensorCalibration extends LinearOpMode {
             }
 
             telemetry.addData("Spindexer Pos", spindexer.getSpindexerPos());
+            telemetry.addData("Gobilda Sensor: ", gobildaSensor.getVoltage());
 
             float step = 5;
 

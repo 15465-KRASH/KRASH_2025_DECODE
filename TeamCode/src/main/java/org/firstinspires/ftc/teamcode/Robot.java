@@ -82,6 +82,12 @@ public class Robot {
         }
     }
 
+    public void initRobot(){
+        intake.stop();
+        shooter.loadArtifact(0);
+        spindexer.resetPos();
+    }
+
     public TargetInfo getAprilTagInfo() {
         LLResult llResult;
         llResult = limelight.getLatestResult();

@@ -14,9 +14,13 @@ public class IntakeArtifactInOrder implements Action {
     private boolean running = true;
     private boolean canceled = false;
     private int targetSlot = -1;
+    private boolean waiting = false;
+    private boolean timerStarted = false;
     private boolean isAuto = false;
 
+    private double intakeDelay = 0.3;
     private double autoTimeout = 7.5;
+    private ElapsedTime timeoutTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     private Intake intake;
@@ -30,6 +34,7 @@ public class IntakeArtifactInOrder implements Action {
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
+        spindexer.updateController();
         if (!canceled) {
             if (!initialized) {
                 targetSlot = 0;
@@ -38,28 +43,42 @@ public class IntakeArtifactInOrder implements Action {
                 intake.intakeArtifact();
                 initialized = true;
                 running = true;
-                timer.reset();
+                waiting = true;
+                timerStarted = false;
+                timeoutTimer.reset();
             } else if (targetSlot == -1) {
                 intake.stop();
                 running = false;
             }
 
             spindexer.moveToIntakePos(targetSlot);
+            spindexer.updateController();
 
-            if(timer.seconds() >= autoTimeout && isAuto){
+            if(timeoutTimer.seconds() >= autoTimeout && isAuto){
                 intake.stop();
                 running = false;
             }
 
             if (running) {
-                if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
-
-                    targetSlot ++;
-                    if (targetSlot < 3 && targetSlot > -1) {
-                        intake.intakeArtifact();
-                    } else {
-                        intake.stop();
-                        running = false;
+                if (spindexer.spindexerAtTarget() && spindexer.isGobildaIntakeSlotFull()) {
+                    if(waiting){
+                        if(timerStarted){
+                            waiting = timer.seconds() <= intakeDelay;
+                        } else {
+                            timerStarted = true;
+                            timer.reset();
+                        }
+                    }
+                    if (!waiting) {
+                        timerStarted = false;
+                        waiting = true;
+                        targetSlot++;
+                        if (targetSlot < 3 && targetSlot > -1) {
+                            intake.intakeArtifact();
+                        } else {
+                            intake.stop();
+                            running = false;
+                        }
                     }
                 }
             }

@@ -58,6 +58,7 @@ public class ShootAllVariant implements Action {
     public boolean run(@NonNull TelemetryPacket packet) {
         if (!canceled) {
             shooter.updateController();
+            spindexer.updateController();
             if (!initialized) {
                 getNextColor(1);
                 shooter.spinUp(shooter.targetRPM);

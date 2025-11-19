@@ -123,8 +123,8 @@ public class Red_Far extends LinearOpMode {
 
         Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(35, 19), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(35, 39), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(36, 19), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(36, 39), Math.toRadians(90));
 
         Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 39), Math.toRadians(90));
@@ -132,8 +132,8 @@ public class Red_Far extends LinearOpMode {
         Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
         Pose2d parkHighPos = new Pose2d(new Vector2d(50, 26), Math.toRadians(160.5));
 
-        TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(10);
-        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-20, 2);
+        TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
+        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-30, 1.5);
 
         Robot m_robot = new Robot(hardwareMap, telemetry, initialPose);
 
@@ -154,8 +154,8 @@ public class Red_Far extends LinearOpMode {
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(180))
-                .splineTo(startPickup.position, Math.toRadians(90))
-                .splineTo(finishPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+                .splineToSplineHeading(startPickup, Math.toRadians(90))
+                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint);
 
 //        TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
 //                .setTangent(Math.toRadians(180))
@@ -171,7 +171,7 @@ public class Red_Far extends LinearOpMode {
         Action shootSecondAction = shootSecondTraj.build();
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
+                .setTangent(Math.toRadians(160.5))
                 .splineTo(start2ndPickup.position, Math.toRadians(90))
                 .splineTo(finish2ndPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
 
@@ -191,8 +191,7 @@ public class Red_Far extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
-        m_robot.intake.stop();
-        m_robot.shooter.loadArtifact(0);
+        m_robot.initRobot();
         m_robot.spindexer.initSpindexerforAuton();
 
         if(m_robot.lights != null){

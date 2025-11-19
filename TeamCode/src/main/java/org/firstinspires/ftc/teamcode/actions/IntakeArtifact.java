@@ -30,6 +30,7 @@ public class IntakeArtifact implements Action {
 
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
+        spindexer.updateController();
         if (!canceled) {
             if (!initialized) {
                 targetSlot = spindexer.gotoClosestEmptyIntake();
@@ -48,9 +49,10 @@ public class IntakeArtifact implements Action {
                 intake.stop();
                 running = false;
             }
+            spindexer.updateController();
 
             if (running) {
-                if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
+                if (spindexer.spindexerAtTarget() && spindexer.isGobildaIntakeSlotFull()) {
                     spindexer.setSlot(targetSlot, spindexer.readIntakeHSV());
 //                    int x = 0;
 //                    while (tempColor == Spindexer.DetectedColor.NONE && x < 5){

@@ -119,7 +119,7 @@ public class Drive_OpMode extends LinearOpMode {
         double distance;
 
         boolean fieldRel = false;
-        boolean tasteTheRainbow = true;
+        boolean tasteTheRainbow = false;
 
 
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
@@ -181,9 +181,12 @@ public class Drive_OpMode extends LinearOpMode {
         LLResult llResult;
 
         // Wait for the game to start (driver presses START)
-        m_robot.intake.stop();
-        m_robot.shooter.loadArtifact(0);
-        waitForStart();
+        m_robot.initRobot();
+
+//        waitForStart();
+        tasteTheRainbow = true;
+
+
 
         while (!isStarted() && !isStopRequested()) {
             llResult = m_robot.limelight.getLatestResult();
@@ -196,7 +199,12 @@ public class Drive_OpMode extends LinearOpMode {
                     }
                 }
             }
+            if(tasteTheRainbow && m_robot.lights != null){
+                m_robot.lights.rainbow();
+            }
         }
+        tasteTheRainbow = false;
+        m_robot.lights.setYellow();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -204,6 +212,7 @@ public class Drive_OpMode extends LinearOpMode {
 
             //Update custom PID here
             m_robot.shooter.updateController();
+//            m_robot.spindexer.updateController(); //Spindexer updated in reset button tree
 
             //Update limelight tag distance if visible
             targetInfo = m_robot.getTargetTagInfo();
@@ -315,14 +324,14 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.spindexer.manualSpindexer();
             } else if (zeroSpindexer.newRelease()){
                 m_robot.spindexer.stop();
-                m_robot.spindexer.zeroSpindexer();
-            }
-
-            if(scanIntake.getCurrentPress()){
+                m_robot.spindexer.resetPos();
+            } else if(scanIntake.getCurrentPress()){
                 m_robot.spindexer.manualInvertSpindexer();
             } else if (scanIntake.newRelease()){
                 m_robot.spindexer.stop();
-                m_robot.spindexer.zeroSpindexer();
+                m_robot.spindexer.resetPos();
+            } else {
+                m_robot.spindexer.updateController();
             }
 
 //            if(readColors.getCurrentPress()) {

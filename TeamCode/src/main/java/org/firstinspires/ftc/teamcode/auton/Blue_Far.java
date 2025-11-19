@@ -173,8 +173,7 @@ public class Blue_Far extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         MatchInfo.setAllianceColor(MatchInfo.AllianceColor.BLUE);
-        m_robot.intake.stop();
-        m_robot.shooter.loadArtifact(0);
+        m_robot.initRobot();
         m_robot.spindexer.initSpindexerforAuton();
 
         while (!isStarted() && !isStopRequested()) {
