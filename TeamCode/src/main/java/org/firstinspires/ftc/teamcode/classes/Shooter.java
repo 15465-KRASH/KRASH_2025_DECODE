@@ -9,6 +9,7 @@ import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.util.InterpLUT;
+import com.arcrobotics.ftclib.util.LUT;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -40,6 +41,7 @@ public class Shooter {
 
     PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
     PIDEx motorController = new PIDEx(pidExCoeff);
+    boolean shooterEnabled = true;
 
     FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
     BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
@@ -56,15 +58,20 @@ public class Shooter {
         }
     }
 
-    public ShooterSettings reallyfarShot = new ShooterSettings(2.5,0, 3400);
-    public ShooterSettings farShot = new ShooterSettings(2.0,0, 3250);
-    public ShooterSettings topOfTheKey = new ShooterSettings(1.25,0.25, 2850);
+    public ShooterSettings maxRange = new ShooterSettings(3.2, 0, 3400);
+    public ShooterSettings reallyfarShot = new ShooterSettings(2.5,0, 3275);
+    public ShooterSettings farShot = new ShooterSettings(2.3,0, 3260);
+    public ShooterSettings topOfTriangle = new ShooterSettings(2.1,0, 3175);
+    public ShooterSettings topOfTheKey = new ShooterSettings(1.8,0.25, 2875);
     public ShooterSettings belowTheKey = new ShooterSettings(1.0,0.25, 2600);
 
-    InterpLUT shooterSpeedTable = new InterpLUT();
-    InterpLUT shooterHoodTable = new InterpLUT();
+//    LUT shooterSpeedTable = new LUT();
+//    LUT shooterHoodTable = new LUT();
 
-    ShooterSettings[] settingsArray = {belowTheKey, topOfTheKey, farShot, reallyfarShot};
+    public InterpLUT shooterSpeedTable = new InterpLUT();
+    public InterpLUT shooterHoodTable = new InterpLUT();
+
+    ShooterSettings[] settingsArray = {belowTheKey, topOfTheKey, topOfTriangle, farShot, reallyfarShot, maxRange};
     
     public static final int ticksPerRev = 28;
     public int targetRPM = 0;
@@ -101,11 +108,20 @@ public class Shooter {
             shooterSpeedTable.add(set.minDistance, set.rpm);
             shooterHoodTable.add(set.minDistance, set.hoodPos);
         }
+
+
         shooterSpeedTable.createLUT();
         shooterHoodTable.createLUT();
 
 
         hood.setPosition(0);
+    }
+
+    public void enable(){
+        shooterEnabled = true;
+    }
+    public void disable(){
+        shooterEnabled = false;
     }
 
     public void updateController(){
@@ -114,7 +130,7 @@ public class Shooter {
         double targetAccel = (targetSpeed) / targetAccelTime;
         double pidOutput = motorController.calculate(targetSpeed, currentSpeed);
         double ffOutput = motorFFController.calculate(0, targetSpeed, targetAccel);
-        if (targetSpeed != 0) {
+        if (targetSpeed != 0 && shooterEnabled) {
             flywheel.setPower(Range.clip(pidOutput + ffOutput, -1.0, 1.0));
         } else {
             flywheel.setPower(0);
@@ -156,13 +172,19 @@ public class Shooter {
         targetSpeed = targetRPS * ticksPerRev;
     }
 
+    public int getTargetRPM(){
+        return targetRPM;
+    }
+
     public void spinUp(int target) {
         setTargetSpeed(target);
+        enable();
     }
 
     public void idle() {
         setTargetSpeed(0);
         flywheel.setPower(0);
+        disable();
         //Uncomment below to keep idling instead of stopping
         //flywheel.setVelocity(idleSpeed);
     }
@@ -216,9 +238,12 @@ public class Shooter {
 //                setTargetSpeed(setting.rpm);
 //                return;
 //            }
-        if (distance < 0.5) {
+        if (distance <= 1.0) {
             setHood(shooterHoodTable.get(2.4));
             setTargetSpeed((int) shooterSpeedTable.get(2.4));
+        } else if(distance > settingsArray[settingsArray.length-1].minDistance){
+            setHood(settingsArray[settingsArray.length-1].hoodPos);
+            setTargetSpeed(settingsArray[settingsArray.length-1].rpm);
         } else {
             setHood(shooterHoodTable.get(distance));
             setTargetSpeed((int) shooterSpeedTable.get(distance));

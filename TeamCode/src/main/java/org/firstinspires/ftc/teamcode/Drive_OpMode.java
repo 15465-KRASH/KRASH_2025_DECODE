@@ -204,7 +204,7 @@ public class Drive_OpMode extends LinearOpMode {
             }
         }
         tasteTheRainbow = false;
-        m_robot.lights.setYellow();
+        m_robot.lights.setOff();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -264,9 +264,10 @@ public class Drive_OpMode extends LinearOpMode {
             }
 
 
-
+            m_robot.shooter.setupShooter(distance);
             telemetry.addData("Heading:", Math.toDegrees(m_robot.drive.localizer.getPose().heading.toDouble()));
             telemetry.addData("Distance to Target: ", distance);
+            telemetry.addData("Target RPM: ", m_robot.shooter.getTargetRPM());
 
             double rotation = Math.pow(-gamepad1.right_stick_x, 3) * powerScale;
 
@@ -280,11 +281,15 @@ public class Drive_OpMode extends LinearOpMode {
             m_robot.drive.setDrivePowers(driveControl);
 
             if(runLift.getCurrentPress() && gamepad1.dpad_left){
-                m_robot.lift.runLiftBalanced();
-                tasteTheRainbow = true;
+                m_robot.lift.runLift();
+//                tasteTheRainbow = true;
             } else {
                 m_robot.lift.stopLift();
             }
+
+//            if(gamepad1.dpad_up){
+//                m_robot.lift.runLiftBalanced(true);
+//            }
 
             if (changeAlliance.newPress()) {
                 MatchInfo.swapAllianceColor();

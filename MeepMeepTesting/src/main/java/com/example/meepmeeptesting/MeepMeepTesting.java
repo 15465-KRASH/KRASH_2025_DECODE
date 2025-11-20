@@ -27,12 +27,13 @@ public class MeepMeepTesting {
         double shotAngle = 160.5;
 
 //        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
-        Pose2d initialPose = new Pose2d(64, 15, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(62, 14.5, Math.toRadians(180));
 
-        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(shotAngle));
+        Pose2d firstShot = new Pose2d(new Vector2d(56, 15), Math.toRadians(shotAngle));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(36, 30), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(36, 42), Math.toRadians(90));
+        Pose2d pickupWaypoint = new Pose2d(new Vector2d(43,2), Math.toRadians(135));
+        Pose2d startPickup = new Pose2d(new Vector2d(37, 2), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(37, 42), Math.toRadians(90));
 
         Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 39), Math.toRadians(90));

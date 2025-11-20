@@ -5,14 +5,10 @@ import android.graphics.Color;
 import androidx.annotation.NonNull;
 
 import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.PIDEx;
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
-import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorRangeSensor;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -20,6 +16,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -63,10 +60,15 @@ public class Spindexer {
     boolean pickedUp = false;
 
     public int spindexerStep = 179;
-    public int maxSpindexerRot = 5;
+    public int maxSpindexerRot = 2;
     public int rot = 3*spindexerStep;
     public int spindexerInitialTol = 10;
     public int spindexerFinalTol = 2;
+
+    public int waggleTarget = 0;
+    public ElapsedTime waggleTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+    public double waggleTimerStep = 0.2;
+    public int waggleStep = 3;
 
     public double spinPwr = 0.5;
 
@@ -290,6 +292,8 @@ public class Spindexer {
         int target = intakeSpindexPos[slotnum];
         int finalTarget = calcNearestPos(target);
         runSpindexerPos(finalTarget, spinPwr);
+        waggleTarget = finalTarget;
+        waggleTimer.reset();
     }
 
     public void moveToShooterPos(int slotnum){
@@ -410,7 +414,7 @@ public class Spindexer {
         return gobildaSensor.getVoltage() < 0.3;
     }
 
-    public boolean spindexerAtTarget(){
+    public boolean atTarget(){
         int currentTarget = rotationMotor.getTargetPosition();
         int tol = Math.abs(currentTarget - rotationMotor.getCurrentPosition());
         telemetry.addData("Spindexer Tol: ", tol);
@@ -539,6 +543,17 @@ public class Spindexer {
             return Ks;
         } else {
             return 0;
+        }
+    }
+
+    public void waggle(){
+        if(waggleTimer.seconds() >= waggleTimerStep){
+            waggleTimer.reset();
+            if(rotationMotor.getTargetPosition() < waggleTarget){
+                rotationMotor.setTargetPosition(waggleTarget + waggleStep);
+            } else {
+                rotationMotor.setTargetPosition(waggleTarget - waggleStep);
+            }
         }
     }
 

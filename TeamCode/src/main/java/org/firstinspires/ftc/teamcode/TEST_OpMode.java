@@ -39,6 +39,7 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -66,7 +67,7 @@ import java.util.List;
  */
 
 @TeleOp(name="TEST", group="TEST")
-//@Disabled
+@Disabled
 public class TEST_OpMode extends LinearOpMode {
 
     enum PIDFVals {

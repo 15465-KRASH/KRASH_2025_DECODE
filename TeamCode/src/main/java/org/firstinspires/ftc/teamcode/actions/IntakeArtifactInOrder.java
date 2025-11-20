@@ -60,7 +60,10 @@ public class IntakeArtifactInOrder implements Action {
             }
 
             if (running) {
-                if (spindexer.spindexerAtTarget() && spindexer.isGobildaIntakeSlotFull()) {
+                if(spindexer.atTarget()){
+                    spindexer.waggle();
+                }
+                if (spindexer.atTarget() && spindexer.isGobildaIntakeSlotFull()) {
                     if(waiting){
                         if(timerStarted){
                             waiting = timer.seconds() <= intakeDelay;

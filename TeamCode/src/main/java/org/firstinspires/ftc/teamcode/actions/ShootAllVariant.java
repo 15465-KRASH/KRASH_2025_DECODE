@@ -115,7 +115,7 @@ public class ShootAllVariant implements Action {
 //            sleep(5);
             
             if (atSpeed && !waiting) {
-                if (spindexer.spindexerAtTarget()) {
+                if (spindexer.atTarget()) {
                     packet.put("Executing launch", 0);
                     packet.put("Target Slot: ", targetSlot);
 

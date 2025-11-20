@@ -50,7 +50,7 @@ public class IntakeArtifact_BACKUP implements Action {
             }
 
             if (running) {
-                if (spindexer.spindexerAtTarget() && spindexer.isIntakeSlotFull()) {
+                if (spindexer.atTarget() && spindexer.isIntakeSlotFull()) {
                     spindexer.setSlot(targetSlot, spindexer.readIntakeHSV());
 //                    int x = 0;
 //                    while (tempColor == Spindexer.DetectedColor.NONE && x < 5){

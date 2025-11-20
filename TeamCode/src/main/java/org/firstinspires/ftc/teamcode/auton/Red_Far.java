@@ -33,35 +33,25 @@ import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.AccelConstraint;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
-import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
-import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -108,8 +98,6 @@ public class Red_Far extends LinearOpMode {
 
         TelemetryPacket packet = new TelemetryPacket();
 
-        ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-
         int tagID = 0;
         int shooterRPM = 3250;
 
@@ -118,26 +106,20 @@ public class Red_Far extends LinearOpMode {
 
         LLResult llResult;
 
-        double shotAngle = 160.5;
-
-//        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
         Pose2d initialPose = new Pose2d(64, 15, Math.toRadians(180));
+//        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
-        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(shotAngle));
+        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(36, 30), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(36, 42), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(35, 19), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(35, 39), Math.toRadians(90));
 
         Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 39), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
-        Pose2d parkHighPos = new Pose2d(new Vector2d(50, 26), Math.toRadians(160.5));
 
         TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
-        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-50, 10);
-
-        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
         Robot m_robot = new Robot(hardwareMap, telemetry, initialPose);
 
@@ -151,37 +133,28 @@ public class Red_Far extends LinearOpMode {
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
         TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
+                .setTangent(Math.toRadians(180))
                 .lineToXLinearHeading(firstShot.position.x, firstShot.heading);
-
-//        TrajectoryActionBuilder firstShotTraj = myBot.getDrive().actionBuilder(initialPose)
-//                .splineTo(new Vector2d(48, 48), Math.toRadians(90));
 
         Action firstShotAction = firstShotTraj.build();
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(shotAngle))
-                .splineTo(startPickup.position, Math.toRadians(90))
-                .splineTo(new Vector2d(startPickup.position.x, startPickup.position.y + 2), Math.toRadians(90), pickupVelConstraint)
-                .splineTo(finishPickup.position, Math.toRadians(90), new TranslationalVelConstraint(50), pickupAccelConstraint);
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(startPickup, Math.toRadians(90))
+                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint);
 
         Action pickupFirstAction = pickupFirst.build();
 
         TrajectoryActionBuilder shootSecondTraj = pickupFirst.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(firstShot, Math.toRadians(shotAngle) - Math.toRadians(180));
+                .splineToLinearHeading(firstShot, Math.toRadians(160) - Math.toRadians(180));
 
         Action shootSecondAction = shootSecondTraj.build();
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(shotAngle))
-                .splineTo(start2ndPickup.position, Math.toRadians(90))
-                .splineTo(new Vector2d(start2ndPickup.position.x, start2ndPickup.position.y + 2), Math.toRadians(90), pickupVelConstraint)
-                .splineTo(finish2ndPickup.position, Math.toRadians(90), new TranslationalVelConstraint(50), pickupAccelConstraint);
-
-//        TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
-//                .setTangent(Math.toRadians(180))
-//                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
-//                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
+                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), pickupVelConstraint);
 
         Action pickupSecondAction = pickupSecond.build();
 
@@ -191,17 +164,11 @@ public class Red_Far extends LinearOpMode {
 
         Action finalPosAction = finalPosTraj.build();
 
-        //Third shot here
-
 
         // Wait for the game to start (driver presses START)
-        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
-        m_robot.initRobot();
+        m_robot.intake.stop();
+        m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
-
-        if(m_robot.lights != null){
-            m_robot.lights.setYellow();
-        }
 
         m_robot.spindexer.showSlots();
 //        sleep(5000);
@@ -221,30 +188,28 @@ public class Red_Far extends LinearOpMode {
                     }
                 }
             }
+        }
 
-            llResult = m_robot.limelight.getLatestResult();
-            if (llResult != null) {
-                if (llResult.isValid()) {
-                    // Access AprilTag results
-                    List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
-                    for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                        if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
-                            tagID = fr.getFiducialId();
-                        }
+        if(m_robot.lights != null){
+            m_robot.lights.setYellow();
+        }
+
+        llResult = m_robot.limelight.getLatestResult();
+        if (llResult != null) {
+            if (llResult.isValid()) {
+                // Access AprilTag results
+                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
+                        tagID = fr.getFiducialId();
                     }
                 }
             }
         }
 
-    timer.reset();
-
-
-
         if(tagID <21 || tagID >23){
             tagID = 21;
         }
-
-        MatchInfo.patternGreenPos = tagID - 21;
 
         shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);

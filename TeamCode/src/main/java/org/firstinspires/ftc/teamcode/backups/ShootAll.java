@@ -63,7 +63,7 @@ public class ShootAll implements Action {
                 packet.put("Velocity", shooter.getSpeed());
             }
             if (atSpeed && !waiting && targetSlot != 3) {
-                if (spindexer.spindexerAtTarget()) {
+                if (spindexer.atTarget()) {
                     packet.put("Executing launch", 0);
                     packet.put("Target Slot: ", targetSlot);
 //                    sleep(2000);

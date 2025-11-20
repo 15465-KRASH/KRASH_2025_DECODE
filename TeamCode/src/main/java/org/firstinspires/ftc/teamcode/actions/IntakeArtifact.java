@@ -14,9 +14,14 @@ public class IntakeArtifact implements Action {
     private boolean running = true;
     private boolean canceled = false;
     private int targetSlot = -1;
+    private boolean waiting = false;
+    private boolean timerStarted = false;
     private boolean isAuto = false;
 
+    private double intakeDelay = 0.4;
+
     private double autoTimeout = 7.5;
+    private ElapsedTime timeoutTimer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     private Intake intake;
@@ -39,21 +44,35 @@ public class IntakeArtifact implements Action {
                 intake.intakeArtifact();
                 initialized = true;
                 running = true;
-                timer.reset();
+                waiting = true;
+                timerStarted = false;
+                timeoutTimer.reset();
             } else if (targetSlot == -1) {
                 intake.stop();
                 running = false;
             }
 
-            if(timer.seconds() >= autoTimeout && isAuto){
+            if(timeoutTimer.seconds() >= autoTimeout && isAuto){
                 intake.stop();
                 running = false;
             }
             spindexer.updateController();
 
             if (running) {
-                if (spindexer.spindexerAtTarget() && spindexer.isGobildaIntakeSlotFull()) {
-                    spindexer.setSlot(targetSlot, spindexer.readIntakeHSV());
+                if(spindexer.atTarget()){
+                    spindexer.waggle();
+                }
+                if (spindexer.atTarget() && spindexer.isGobildaIntakeSlotFull()) {
+                    if (waiting) {
+                        if (timerStarted) {
+                            waiting = timer.seconds() <= intakeDelay;
+                        } else {
+                            timerStarted = true;
+                            timer.reset();
+                        }
+                    }
+                    if (!waiting) {
+                        spindexer.setSlot(targetSlot, spindexer.readIntakeHSV());
 //                    int x = 0;
 //                    while (tempColor == Spindexer.DetectedColor.NONE && x < 5){
 //                        x++;
@@ -61,16 +80,17 @@ public class IntakeArtifact implements Action {
 //                        tempColor =  spindexer.getIntakeColor();
 //                    }
 
-                    if(spindexer.getSlotColor(targetSlot) == Spindexer.DetectedColor.NONE){
-                        spindexer.setSlotPurple(targetSlot);
-                    }
+                        if (spindexer.getSlotColor(targetSlot) == Spindexer.DetectedColor.NONE) {
+                            spindexer.setSlotPurple(targetSlot);
+                        }
 
-                    targetSlot = spindexer.gotoClosestEmptyIntake();
-                    if (targetSlot != -1) {
-                        intake.intakeArtifact();
-                    } else {
-                        intake.stop();
-                        running = false;
+                        targetSlot = spindexer.gotoClosestEmptyIntake();
+                        if (targetSlot != -1) {
+                            intake.intakeArtifact();
+                        } else {
+                            intake.stop();
+                            running = false;
+                        }
                     }
                 }
             }

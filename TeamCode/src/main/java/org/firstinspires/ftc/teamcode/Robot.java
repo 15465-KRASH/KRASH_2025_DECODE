@@ -85,6 +85,7 @@ public class Robot {
     public void initRobot(){
         intake.stop();
         shooter.loadArtifact(0);
+        shooter.disable();
         spindexer.resetPos();
     }
 

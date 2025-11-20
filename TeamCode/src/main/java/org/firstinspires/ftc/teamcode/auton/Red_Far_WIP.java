@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.backups;
+package org.firstinspires.ftc.teamcode.auton;
 
 import android.annotation.SuppressLint;
 
@@ -51,6 +51,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.actions.AutoTimeoutAction;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
@@ -74,9 +75,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Red_Far", group = "Comp")
+@Autonomous(name = "Red_Far_WIP", group = "Test")
 @Disabled
-public class Red_Far_Backup extends LinearOpMode {
+public class Red_Far_WIP extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -102,6 +103,8 @@ public class Red_Far_Backup extends LinearOpMode {
         FtcDashboard dash = FtcDashboard.getInstance();
         List<Action> runningActions = new ArrayList<>();
 
+        boolean runSecondPickup = true;
+
         TelemetryPacket packet = new TelemetryPacket();
 
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
@@ -114,22 +117,26 @@ public class Red_Far_Backup extends LinearOpMode {
 
         LLResult llResult;
 
+        double shotAngle = 160.5;
+
+//        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
         Pose2d initialPose = new Pose2d(64, 15, Math.toRadians(180));
-        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
-        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
+        Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(shotAngle));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(35, 19), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(35, 39), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(37, 22), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(37, 42), Math.toRadians(90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 19), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 39), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(11, 20), Math.toRadians(90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(11, 42), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
         Pose2d parkHighPos = new Pose2d(new Vector2d(50, 26), Math.toRadians(160.5));
 
-        TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(10);
-        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-20, 2);
+        TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
+        AccelConstraint pickupAccelConstraint = new ProfileAccelConstraint(-50, 2);
+
+        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
         Robot m_robot = new Robot(hardwareMap, telemetry, initialPose);
 
@@ -141,35 +148,35 @@ public class Red_Far_Backup extends LinearOpMode {
         IntakeArtifactInOrder intakeAction = new IntakeArtifactInOrder(m_robot.intake, m_robot.spindexer, true);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
+        AutoTimeoutAction autoTimeoutAction = new AutoTimeoutAction(timer, 45);
 
         TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(180))
                 .lineToXLinearHeading(firstShot.position.x, firstShot.heading);
+
+//        TrajectoryActionBuilder firstShotTraj = myBot.getDrive().actionBuilder(initialPose)
+//                .splineTo(new Vector2d(48, 48), Math.toRadians(90));
 
         Action firstShotAction = firstShotTraj.build();
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
+                .setTangent(Math.toRadians(shotAngle))
                 .splineTo(startPickup.position, Math.toRadians(90))
-                .splineTo(finishPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
-
-//        TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-//                .setTangent(Math.toRadians(180))
-//                .splineToSplineHeading(startPickup, Math.toRadians(90))
-//                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+                .splineTo(new Vector2d(startPickup.position.x, startPickup.position.y + 4), Math.toRadians(90), pickupVelConstraint)
+                .splineTo(finishPickup.position, Math.toRadians(90), new TranslationalVelConstraint(50), pickupAccelConstraint);
 
         Action pickupFirstAction = pickupFirst.build();
 
         TrajectoryActionBuilder shootSecondTraj = pickupFirst.endTrajectory().fresh()
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(firstShot, Math.toRadians(160) - Math.toRadians(180));
+                .splineToLinearHeading(firstShot, Math.toRadians(shotAngle) - Math.toRadians(180));
 
         Action shootSecondAction = shootSecondTraj.build();
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(180))
+                .setTangent(Math.toRadians(shotAngle))
                 .splineTo(start2ndPickup.position, Math.toRadians(90))
-                .splineTo(finish2ndPickup.position, Math.toRadians(90), pickupVelConstraint, pickupAccelConstraint);
+                .splineTo(new Vector2d(start2ndPickup.position.x, start2ndPickup.position.y + 4), Math.toRadians(90), pickupVelConstraint)
+                .splineTo(finish2ndPickup.position, Math.toRadians(90), new TranslationalVelConstraint(50), pickupAccelConstraint);
 
 //        TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
 //                .setTangent(Math.toRadians(180))
@@ -184,11 +191,21 @@ public class Red_Far_Backup extends LinearOpMode {
 
         Action finalPosAction = finalPosTraj.build();
 
+        //Third shot here
+        TrajectoryActionBuilder thirdShotTraj = pickupSecond.endTrajectory().fresh()
+                .setTangent(Math.toRadians(-90))
+                .splineToLinearHeading(firstShot, Math.toRadians(shotAngle) - Math.toRadians(180));
+
+        Action thirdShotAction = thirdShotTraj.build();
+
+        TrajectoryActionBuilder shotParkTraj = thirdShotTraj.endTrajectory().fresh()
+                .lineToX(firstShot.position.x + 10);
+
+        Action shotParkAction = shotParkTraj.build();
 
         // Wait for the game to start (driver presses START)
         MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
-        m_robot.intake.stop();
-        m_robot.shooter.loadArtifact(0);
+        m_robot.initRobot();
         m_robot.spindexer.initSpindexerforAuton();
 
         if(m_robot.lights != null){
@@ -279,17 +296,33 @@ public class Red_Far_Backup extends LinearOpMode {
         m_robot.spindexer.showSlots();
 //        sleep(5000);
 
-        Actions.runBlocking(new ParallelAction(
-                intakeAction,
-                pickupSecondAction
-        ));
+        if(runSecondPickup) {
+            Actions.runBlocking(new ParallelAction(
+                    intakeAction,
+                    pickupSecondAction
+            ));
 
-        m_robot.spindexer.initSpindexer(1);
+            m_robot.spindexer.initSpindexer(1);
 
-        m_robot.spindexer.showSlots();
+            m_robot.spindexer.showSlots();
 //        sleep(5000);
 
-        Actions.runBlocking(finalPosAction);
+            if (timer.seconds() >25) {
+                Actions.runBlocking(finalPosAction);
+            } else {
+                Actions.runBlocking(new RaceAction(
+                        autoTimeoutAction,
+                        shootSecondAction,
+                        m_robot.shooter.updateFlywheel()));
+                Actions.runBlocking(new RaceAction(
+                        autoTimeoutAction,
+                        shootAction));
+                Actions.runBlocking(shotParkAction);
+            }
+        } else {
+            Actions.runBlocking(shotParkAction);
+        }
+
 
 //        m_robot.shooter.setTargetSpeed(shooterRPM);
 //        m_robot.shooter.updateController();

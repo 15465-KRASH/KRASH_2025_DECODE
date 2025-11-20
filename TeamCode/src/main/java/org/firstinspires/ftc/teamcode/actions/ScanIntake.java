@@ -6,7 +6,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.classes.Intake;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
 public class ScanIntake implements Action {
@@ -48,7 +47,7 @@ public class ScanIntake implements Action {
 
             waiting = timer.seconds() < holdTime;
 
-            if (running && spindexer.spindexerAtTarget() && !waiting) {
+            if (running && spindexer.atTarget() && !waiting) {
                     if (readCount < 10) {
                         color = spindexer.getIntakeColor();
 

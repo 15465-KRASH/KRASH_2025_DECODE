@@ -36,8 +36,8 @@ public class Lights {
     }
 
     public void setOff(){
-        leftLight.setPosition(0);
-        rightLight.setPosition(0);
+        leftLight.setPosition(0.1);
+        rightLight.setPosition(0.1);
     }
 
     public void set(double setPoint){
