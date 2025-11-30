@@ -63,6 +63,7 @@ public class Robot {
     }
 
     public TargetInfo targetInfo = new TargetInfo();
+    public TargetInfo obelsikInfo = new TargetInfo();
 
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry, Pose2d pose){
@@ -136,12 +137,13 @@ public class Robot {
                     if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
                         telemetry.addData("Tag ID:", fr.getFiducialId());
                         telemetry.update();
+                        obelsikInfo = new TargetInfo(fr);
                         return new TargetInfo(fr);
                     }
                 }
             }
         }
-        return new TargetInfo(21, 0,0);
+        return new TargetInfo(0, 0,0);
     }
 
     public double getTurnToTargetRotation() {
@@ -176,7 +178,7 @@ public class Robot {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                targetInfo = getObeliskInfo();
+                getObeliskInfo();
                 return true;
             }
         };
@@ -184,5 +186,9 @@ public class Robot {
 
     public TargetInfo getTargetInfo() {
         return targetInfo;
+    }
+
+    public TargetInfo getObeliskTag() {
+        return obelsikInfo;
     }
 }

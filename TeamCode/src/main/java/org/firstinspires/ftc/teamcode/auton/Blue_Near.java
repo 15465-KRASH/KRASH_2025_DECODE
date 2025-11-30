@@ -48,7 +48,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
@@ -72,8 +71,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Red_Near", group = "Comp")
-public class Red_Near extends LinearOpMode {
+@Autonomous(name = "Blue_Near", group = "Comp")
+//@Disabled
+public class Blue_Near extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -109,20 +109,20 @@ public class Red_Near extends LinearOpMode {
 
         LLResult llResult;
 
-        Pose2d initialPose = new Pose2d(-39, 55, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(-39, -55, Math.toRadians(180));
         HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
 
-        Pose2d tagCheck = new Pose2d(new Vector2d(-36, 36), Math.toRadians(-135));
-        Pose2d firstShot = new Pose2d(new Vector2d(-12, 10), Math.toRadians(138));
+        Pose2d tagCheck = new Pose2d(new Vector2d(-36, -36), Math.toRadians(135));
+        Pose2d firstShot = new Pose2d(new Vector2d(-12, -10), Math.toRadians(-142));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(-15, 19), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(-15, 40), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(-21, -19), Math.toRadians(-90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(-21, -40), Math.toRadians(-90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(9, 19), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(9, 40), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(3, -19), Math.toRadians(-90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(3, -40), Math.toRadians(-90));
 
-        Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
+        Pose2d finalPos = new Pose2d(new Vector2d(0, -38), Math.toRadians(-90));
 
         TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
 
@@ -137,22 +137,22 @@ public class Red_Near extends LinearOpMode {
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
         TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(-45))
-                .splineToSplineHeading(tagCheck, Math.toRadians(-45))
-                .splineToSplineHeading(firstShot, Math.toRadians(-45));
+                .setTangent(Math.toRadians(45))
+                .splineToSplineHeading(tagCheck, Math.toRadians(45))
+                .splineToSplineHeading(firstShot, Math.toRadians(45));
 
         Action firstShotAction = firstShotTraj.build();
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(90))
-                .splineToSplineHeading(startPickup, Math.toRadians(90))
-                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint);
+                .setTangent(Math.toRadians(-90))
+                .splineToSplineHeading(startPickup, Math.toRadians(-90))
+                .splineToSplineHeading(finishPickup, Math.toRadians(-90), pickupVelConstraint);
 
         Action pickupFirstAction = pickupFirst.build();
 
         TrajectoryActionBuilder shootSecondTraj = pickupFirst.endTrajectory().fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(firstShot, Math.toRadians(-90));
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(firstShot, Math.toRadians(90));
 
         Action shootSecondAction = shootSecondTraj.build();
 
@@ -160,20 +160,20 @@ public class Red_Near extends LinearOpMode {
 
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
                 .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
-                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), pickupVelConstraint);
+                .splineToSplineHeading(start2ndPickup, Math.toRadians(-90))
+                .splineToSplineHeading(finish2ndPickup, Math.toRadians(-90), pickupVelConstraint);
 
         Action pickupSecondAction = pickupSecond.build();
 
         TrajectoryActionBuilder finalPosTraj = pickupSecond.endTrajectory().fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(finalPos, Math.toRadians(179.9));
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(finalPos, Math.toRadians(-179.9));
 
         Action finalPosAction = finalPosTraj.build();
 
 
         // Wait for the game to start (driver presses START)
-        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.BLUE);
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();
@@ -199,7 +199,8 @@ public class Red_Near extends LinearOpMode {
             m_robot.lights.setYellow();
         }
 
-        m_robot.shooter.setupShooter(0.25, 2650);
+
+        m_robot.shooter.setupShooter(0.25, 2700);
 
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
         m_robot.shooter.updateController();

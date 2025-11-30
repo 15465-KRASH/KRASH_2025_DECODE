@@ -62,8 +62,8 @@ public class Shooter {
     public ShooterSettings reallyfarShot = new ShooterSettings(2.5,0, 3275);
     public ShooterSettings farShot = new ShooterSettings(2.3,0, 3260);
     public ShooterSettings topOfTriangle = new ShooterSettings(2.1,0, 3175);
-    public ShooterSettings topOfTheKey = new ShooterSettings(1.8,0.25, 2875);
-    public ShooterSettings belowTheKey = new ShooterSettings(1.0,0.25, 2600);
+    public ShooterSettings topOfTheKey = new ShooterSettings(1.9,0.25, 2940);
+    public ShooterSettings belowTheKey = new ShooterSettings(0.9,0.25, 2600);
 
 //    LUT shooterSpeedTable = new LUT();
 //    LUT shooterHoodTable = new LUT();
@@ -238,7 +238,7 @@ public class Shooter {
 //                setTargetSpeed(setting.rpm);
 //                return;
 //            }
-        if (distance <= 1.0) {
+        if (distance <= 0.91) {
             setHood(shooterHoodTable.get(2.4));
             setTargetSpeed((int) shooterSpeedTable.get(2.4));
         } else if(distance > settingsArray[settingsArray.length-1].minDistance){
@@ -251,6 +251,11 @@ public class Shooter {
 
 //        setHood(settingsArray[settingsArray.length - 1].hoodPos);
 //        setTargetSpeed(settingsArray[settingsArray.length - 1].rpm);
+    }
+
+    public void setupShooter(double hoodPos, int rpm){
+        setHood(hoodPos);
+        setTargetSpeed(2700);
     }
 
 }

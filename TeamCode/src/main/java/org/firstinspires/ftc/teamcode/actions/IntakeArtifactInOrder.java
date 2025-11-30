@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.classes.Intake;
+import org.firstinspires.ftc.teamcode.classes.Lights;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
 public class IntakeArtifactInOrder implements Action {
@@ -25,11 +26,13 @@ public class IntakeArtifactInOrder implements Action {
 
     private Intake intake;
     private Spindexer spindexer;
+    //private Lights leds;
 
     public IntakeArtifactInOrder(Intake intake, Spindexer spindexer, boolean isAuto){
         this.intake = intake;
         this.spindexer = spindexer;
         this.isAuto = isAuto;
+        //this.leds = leds;
     }
 
     @Override
@@ -78,6 +81,7 @@ public class IntakeArtifactInOrder implements Action {
                         targetSlot++;
                         if (targetSlot < 3 && targetSlot > -1) {
                             intake.intakeArtifact();
+                            //leds.showDetectedColor();
                         } else {
                             intake.stop();
                             running = false;

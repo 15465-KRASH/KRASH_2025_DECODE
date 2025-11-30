@@ -204,7 +204,7 @@ public class Drive_OpMode extends LinearOpMode {
             }
         }
         tasteTheRainbow = false;
-        m_robot.lights.setOff();
+        m_robot.lights.setYellow();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -274,6 +274,13 @@ public class Drive_OpMode extends LinearOpMode {
             if (alignToGoal.getCurrentPress() && targetInfo.tagID != 0) {
                 double offset = targetInfo.targetXDegrees;
                 rotation = -0.03 * offset;
+                if (rotation < 0.08 && m_robot.lights != null) {
+                    m_robot.lights.setRed();
+                } else if (m_robot.lights != null) {
+                    m_robot.lights.setYellow();
+                }
+            } else if (m_robot.lights != null && !tasteTheRainbow) {
+                m_robot.lights.setYellow();
             }
 
             driveControl = new PoseVelocity2d(input, rotation);

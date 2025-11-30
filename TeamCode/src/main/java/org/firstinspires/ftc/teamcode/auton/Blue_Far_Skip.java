@@ -48,11 +48,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
-import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
 import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
@@ -72,8 +70,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Red_Near", group = "Comp")
-public class Red_Near extends LinearOpMode {
+@Autonomous(name = "Blue_Far_Skip", group = "Comp")
+//@Disabled
+public class Blue_Far_Skip extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -102,27 +101,25 @@ public class Red_Near extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
 
         int tagID = 0;
-        int shooterRPM;
+        int shooterRPM = 3250;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         LLResult llResult;
 
-        Pose2d initialPose = new Pose2d(-39, 55, Math.toRadians(180));
-        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
+        Pose2d initialPose = new Pose2d(64, -15, Math.toRadians(180));
+//        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
+        Pose2d firstShot = new Pose2d(new Vector2d(58, -15), Math.toRadians(-160.5));
 
-        Pose2d tagCheck = new Pose2d(new Vector2d(-36, 36), Math.toRadians(-135));
-        Pose2d firstShot = new Pose2d(new Vector2d(-12, 10), Math.toRadians(138));
+        Pose2d startPickup = new Pose2d(new Vector2d(27, -26), Math.toRadians(-90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(27, -44), Math.toRadians(-90));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(-15, 19), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(-15, 40), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(4, -27), Math.toRadians(-90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(4, -46), Math.toRadians(-90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(9, 19), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(9, 40), Math.toRadians(90));
-
-        Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
+        Pose2d finalPos = new Pose2d(new Vector2d(-2, -38), Math.toRadians(-90));
 
         TranslationalVelConstraint pickupVelConstraint = new TranslationalVelConstraint(4);
 
@@ -137,45 +134,47 @@ public class Red_Near extends LinearOpMode {
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
 
         TrajectoryActionBuilder firstShotTraj = m_robot.drive.actionBuilder(initialPose)
-                .setTangent(Math.toRadians(-45))
-                .splineToSplineHeading(tagCheck, Math.toRadians(-45))
-                .splineToSplineHeading(firstShot, Math.toRadians(-45));
+                .setTangent(Math.toRadians(180))
+                .lineToXLinearHeading(firstShot.position.x, firstShot.heading);
 
         Action firstShotAction = firstShotTraj.build();
 
         TrajectoryActionBuilder pickupFirst = firstShotTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(90))
-                .splineToSplineHeading(startPickup, Math.toRadians(90))
-                .splineToSplineHeading(finishPickup, Math.toRadians(90), pickupVelConstraint);
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(startPickup, Math.toRadians(-90))
+                .splineToSplineHeading(finishPickup, Math.toRadians(-90), pickupVelConstraint);
 
         Action pickupFirstAction = pickupFirst.build();
 
         TrajectoryActionBuilder shootSecondTraj = pickupFirst.endTrajectory().fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(firstShot, Math.toRadians(-90));
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(firstShot, Math.toRadians(-160) + Math.toRadians(180));
 
         Action shootSecondAction = shootSecondTraj.build();
 
-
-
         TrajectoryActionBuilder pickupSecond = shootSecondTraj.endTrajectory().fresh()
-                .setTangent(Math.toRadians(0))
-                .splineToSplineHeading(start2ndPickup, Math.toRadians(90))
-                .splineToSplineHeading(finish2ndPickup, Math.toRadians(90), pickupVelConstraint);
+                .setTangent(Math.toRadians(180))
+                .splineToSplineHeading(start2ndPickup, Math.toRadians(-90))
+                .splineToSplineHeading(finish2ndPickup, Math.toRadians(-90), pickupVelConstraint);
 
         Action pickupSecondAction = pickupSecond.build();
 
         TrajectoryActionBuilder finalPosTraj = pickupSecond.endTrajectory().fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(finalPos, Math.toRadians(179.9));
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(finalPos, Math.toRadians(-179.9));
 
         Action finalPosAction = finalPosTraj.build();
 
+        TrajectoryActionBuilder shotParkTraj = shootSecondTraj.endTrajectory().fresh()
+                .lineToX(firstShot.position.x - 10);
+
+        Action shotParkAction = shotParkTraj.build();
+
+
 
         // Wait for the game to start (driver presses START)
-        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
-        m_robot.intake.stop();
-        m_robot.shooter.loadArtifact(0);
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.BLUE);
+        m_robot.initRobot();
         m_robot.spindexer.initSpindexerforAuton();
 
         while (!isStarted() && !isStopRequested()) {
@@ -199,9 +198,27 @@ public class Red_Near extends LinearOpMode {
             m_robot.lights.setYellow();
         }
 
-        m_robot.shooter.setupShooter(0.25, 2650);
+        llResult = m_robot.limelight.getLatestResult();
+        if (llResult != null) {
+            if (llResult.isValid()) {
+                // Access AprilTag results
+                List<LLResultTypes.FiducialResult> fiducialResults = llResult.getFiducialResults();
+                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    if (fr.getFiducialId() >= 21 && fr.getFiducialId() <= 23) {
+                        tagID = fr.getFiducialId();
+                    }
+                }
+            }
+        }
 
+        if(tagID <21 || tagID >23){
+            tagID = 21;
+        }
+        MatchInfo.patternGreenPos = tagID - 21;
+
+        shootAction.setShotOrder(tagID - 21);
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
+        m_robot.shooter.setTargetSpeed(shooterRPM);
         m_robot.shooter.updateController();
 
         for(int x = 0; x <=2; x++){
@@ -213,21 +230,7 @@ public class Red_Near extends LinearOpMode {
 
         Actions.runBlocking(new RaceAction(
                 firstShotAction,
-                m_robot.shooter.updateFlywheel(),
-                m_robot.updateLimelight()));
-        sleep(500);
-        tagID = m_robot.getObeliskTag().tagID;
-        if(tagID < 21 || tagID > 23){
-            tagID = 21;
-        }
-        MatchInfo.patternGreenPos = tagID - 21;
-        shootAction.setShotOrder(tagID - 21);
-        sleep(1000);
-        telemetry.addData("Tag ID: ", tagID);
-        telemetry.addData("1st Shot:", shootAction.shotOrder[0].toString());
-        telemetry.addData("2st Shot:", shootAction.shotOrder[1].toString());
-
-        telemetry.update();
+                m_robot.shooter.updateFlywheel()));
         Actions.runBlocking(shootAction);
 
         for(int x = 0; x <=2; x++){
@@ -242,7 +245,7 @@ public class Red_Near extends LinearOpMode {
                 pickupFirstAction
         ));
 
-        m_robot.spindexer.initSpindexer(2);
+        m_robot.spindexer.initSpindexer(0);
 
         for(int x = 0; x <=2; x++){
             telemetry.addLine()
@@ -251,7 +254,7 @@ public class Red_Near extends LinearOpMode {
         }
         telemetry.update();
 
-        m_robot.shooter.setupShooter(0.25, 2700);
+        m_robot.shooter.setTargetSpeed(shooterRPM);
         m_robot.shooter.updateController();
 
         Actions.runBlocking(new RaceAction(
@@ -266,21 +269,36 @@ public class Red_Near extends LinearOpMode {
         }
         telemetry.update();
 
+//        Actions.runBlocking(new ParallelAction(
+//                intakeAction,
+//                pickupSecondAction
+//        ));
+//
+//        m_robot.spindexer.initSpindexer(1);
+//
+//        for(int x = 0; x <=2; x++){
+//            telemetry.addLine()
+//                    .addData("Slot[", x)
+//                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+//        }
+//        telemetry.update();
+
+
         Actions.runBlocking(new ParallelAction(
-                intakeAction,
-                pickupSecondAction
-        ));
+                shotParkAction,
+                intakeAction));
 
-        m_robot.spindexer.initSpindexer(1);
-
-        for(int x = 0; x <=2; x++){
-            telemetry.addLine()
-                    .addData("Slot[", x)
-                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
-        }
-        telemetry.update();
-
-        Actions.runBlocking(finalPosAction);
+//        m_robot.shooter.setTargetSpeed(shooterRPM);
+//        m_robot.shooter.updateController();
+//
+//        m_robot.spindexer.selectAShot(shootAction);
+//
+//        Actions.runBlocking(new RaceAction(
+//                shootThirdAction,
+//                m_robot.shooter.updateFlywheel()));
+//        Actions.runBlocking(shootAction);
+//
+//        Actions.runBlocking(finalPosAction);
 
     }
 
