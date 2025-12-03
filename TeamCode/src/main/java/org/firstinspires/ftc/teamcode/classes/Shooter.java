@@ -42,6 +42,7 @@ public class Shooter {
     PIDCoefficientsEx pidExCoeff = new PIDCoefficientsEx(Kp, Ki, Kd, 0.9, 10, 1);
     PIDEx motorController = new PIDEx(pidExCoeff);
     boolean shooterEnabled = true;
+    public boolean shooterIdle = false;
 
     FeedforwardCoefficients ffCoeff = new FeedforwardCoefficients(Kv,Ka,Ks);
     BasicFeedforward motorFFController = new BasicFeedforward(ffCoeff);
@@ -77,7 +78,7 @@ public class Shooter {
     public int targetRPM = 0;
     public int targetRPS = targetRPM / 60;
     public int targetSpeed = targetRPS * ticksPerRev;
-    public int idleSpeed = 1000 / 60 / ticksPerRev;
+    public int idleSpeed = 1000; // rpm
     public double speedTol = 2 / 100.0; //Percent
     private static int reference = 1517; // targetSpeed (ticks/sec) for 3250 RPM
 
@@ -130,6 +131,7 @@ public class Shooter {
         double targetAccel = (targetSpeed) / targetAccelTime;
         double pidOutput = motorController.calculate(targetSpeed, currentSpeed);
         double ffOutput = motorFFController.calculate(0, targetSpeed, targetAccel);
+
         if (targetSpeed != 0 && shooterEnabled) {
             flywheel.setPower(Range.clip(pidOutput + ffOutput, -1.0, 1.0));
         } else {
@@ -167,7 +169,11 @@ public class Shooter {
     }
 
     public void setTargetSpeed(int rpm){
-        targetRPM = rpm;
+        if(shooterIdle){
+            targetRPM = idleSpeed;
+        } else {
+            targetRPM =rpm;
+        }
         targetRPS = targetRPM / 60;
         targetSpeed = targetRPS * ticksPerRev;
     }
@@ -177,14 +183,19 @@ public class Shooter {
     }
 
     public void spinUp(int target) {
-        setTargetSpeed(target);
+        if (shooterIdle){
+            setTargetSpeed(idleSpeed);
+        } else {
+            setTargetSpeed(target);
+        }
         enable();
     }
 
     public void idle() {
-        setTargetSpeed(0);
-        flywheel.setPower(0);
-        disable();
+        setTargetSpeed(1000); //Was zero
+        shooterIdle = true;
+//        flywheel.setPower(0); //Was not commented
+//        disable(); //Was not commented
         //Uncomment below to keep idling instead of stopping
         //flywheel.setVelocity(idleSpeed);
     }

@@ -57,6 +57,7 @@ public class ShootAllVariant implements Action {
     @Override
     public boolean run(@NonNull TelemetryPacket packet) {
         if (!canceled) {
+            shooter.shooterIdle = false;
             shooter.updateController();
             spindexer.updateController();
             if (!initialized) {
