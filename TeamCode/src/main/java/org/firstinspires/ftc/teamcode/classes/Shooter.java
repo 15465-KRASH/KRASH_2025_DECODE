@@ -200,6 +200,10 @@ public class Shooter {
         //flywheel.setVelocity(idleSpeed);
     }
 
+    public void setNotIdle(){
+        shooterIdle = false;
+    }
+
     public boolean atSpeed() {
         return Math.abs(flywheel.getVelocity() - targetSpeed) <= (targetSpeed * speedTol);
     }

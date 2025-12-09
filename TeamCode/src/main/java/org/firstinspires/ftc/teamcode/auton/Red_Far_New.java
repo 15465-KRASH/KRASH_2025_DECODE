@@ -44,7 +44,6 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
@@ -69,9 +68,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Red_Far_Skip", group = "Comp")
-@Disabled
-public class Red_Far_Skip extends LinearOpMode {
+@Autonomous(name = "Red_Far_New", group = "Comp")
+//@Disabled
+public class Red_Far_New extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -107,15 +106,15 @@ public class Red_Far_Skip extends LinearOpMode {
 
         LLResult llResult;
 
-        Pose2d initialPose = new Pose2d(63, 14.25, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(62, 14.25, Math.toRadians(180));
 //        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
         Pose2d firstShot = new Pose2d(new Vector2d(58, 15), Math.toRadians(160.5));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(36, 36), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(36, 32), Math.toRadians(90));
         Pose2d finishPickup = new Pose2d(new Vector2d(36, 48), Math.toRadians(90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(12, 36), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(12, 31), Math.toRadians(90));
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(12, 48), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 36), Math.toRadians(90));
@@ -164,11 +163,6 @@ public class Red_Far_Skip extends LinearOpMode {
                 .splineToLinearHeading(finalPos, Math.toRadians(179.9));
 
         Action finalPosAction = finalPosTraj.build();
-
-        TrajectoryActionBuilder shotParkTraj = shootSecondTraj.endTrajectory().fresh()
-                .lineToX(firstShot.position.x - 10);
-
-        Action shotParkAction = shotParkTraj.build();
 
 
         // Wait for the game to start (driver presses START)
@@ -236,7 +230,7 @@ public class Red_Far_Skip extends LinearOpMode {
 //        sleep(5000);
 
         Actions.runBlocking(new ParallelAction(
-                intakeAction,
+                new RaceAction(intakeAction, m_robot.shooter.updateFlywheel()),
                 pickupFirstAction
         ));
 
@@ -247,6 +241,7 @@ public class Red_Far_Skip extends LinearOpMode {
         telemetry.update();
 //        sleep(5000);
 
+        m_robot.shooter.setNotIdle();
         m_robot.shooter.setTargetSpeed(shooterRPM);
         m_robot.shooter.updateController();
 
@@ -257,20 +252,18 @@ public class Red_Far_Skip extends LinearOpMode {
 
         m_robot.spindexer.showSlots();
 //        sleep(5000);
-//
-//        Actions.runBlocking(new ParallelAction(
-//                intakeAction,
-//                pickupSecondAction
-//        ));
-//
-//        m_robot.spindexer.initSpindexer(1);
-//
-//        m_robot.spindexer.showSlots();
-////        sleep(5000);
 
         Actions.runBlocking(new ParallelAction(
-                shotParkAction,
-                intakeAction));
+                new RaceAction(intakeAction, m_robot.shooter.updateFlywheel()),
+                pickupSecondAction
+        ));
+
+        m_robot.spindexer.initSpindexer(1);
+
+        m_robot.spindexer.showSlots();
+//        sleep(5000);
+
+        Actions.runBlocking(finalPosAction);
 
 //        m_robot.shooter.setTargetSpeed(shooterRPM);
 //        m_robot.shooter.updateController();

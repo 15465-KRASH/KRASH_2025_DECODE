@@ -182,7 +182,7 @@ public class Lift_Test extends LinearOpMode {
             }
 
             if(gamepad1.dpad_up){
-                m_robot.lift.runLiftBalanced(true);
+                m_robot.lift.runLift();
             }
 
             if(runLeft.getCurrentPress()){
@@ -196,7 +196,7 @@ public class Lift_Test extends LinearOpMode {
                 m_robot.lift.rightClimbMotor.setPower(0);
             }
 
-            m_robot.lift.runLiftBalanced(true);
+//            m_robot.lift.runLiftBalanced(true);
             telemetry.addData("Left Pos: ", m_robot.lift.leftClimbMotor.getCurrentPosition());
             telemetry.addData("Right Pos: ", m_robot.lift.rightClimbMotor.getCurrentPosition());
 

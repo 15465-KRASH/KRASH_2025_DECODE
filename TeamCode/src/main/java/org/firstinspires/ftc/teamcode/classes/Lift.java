@@ -22,7 +22,7 @@ public class Lift {
     public static double KvI = 1.0;
     public static double KF = 1.0;
 
-    public int liftTarget = 6100;
+    public int liftTarget = 17500;
 
     public Lift (HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -57,14 +57,14 @@ public class Lift {
         rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         if(leftClimbMotor.getCurrentPosition() < liftTarget){
-            leftClimbMotor.setPower(0.5);
+            leftClimbMotor.setPower(0.6);
         }
         else {
             leftClimbMotor.setPower(0);
         }
 
         if(rightClimbMotor.getCurrentPosition() < liftTarget){
-            rightClimbMotor.setPower(0.5);
+            rightClimbMotor.setPower(0.6);
         } else {
             rightClimbMotor.setPower(0);
         }
@@ -75,15 +75,15 @@ public class Lift {
 
         double balanceFactor = 0.001;
 
-        leftClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightClimbMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftClimbMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightClimbMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         int leftPos = leftClimbMotor.getCurrentPosition();
         int rightPos = rightClimbMotor.getCurrentPosition();
 
         int diff = leftPos - rightPos;
-        double leftPower = 0.8 - balanceFactor*diff;
-        double rightPower = 0.7 + balanceFactor*diff;
+        double leftPower = 0.9 - balanceFactor*diff;
+        double rightPower = 0.9+ balanceFactor*diff;
 
         telemetry.addData("Lift Correction: ", diff * balanceFactor);
         telemetry.addData("Left Power: ", leftPower);
