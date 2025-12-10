@@ -50,6 +50,7 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
+import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,6 +167,7 @@ public class Red_Far_New extends LinearOpMode {
 
 
         // Wait for the game to start (driver presses START)
+        MatchInfo.setAllianceColor(MatchInfo.AllianceColor.RED);
         m_robot.intake.stop();
         m_robot.shooter.loadArtifact(0);
         m_robot.spindexer.initSpindexerforAuton();

@@ -44,15 +44,12 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifactInOrder;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
-import org.firstinspires.ftc.teamcode.classes.HeadingStorage;
 import org.firstinspires.ftc.teamcode.classes.MatchInfo;
 
 import java.util.ArrayList;
@@ -73,6 +70,7 @@ import java.util.List;
  */
 
 @Autonomous(name = "Red_Near", group = "Comp")
+//@Disabled
 public class Red_Near extends LinearOpMode {
 
     enum PIDFVals {
@@ -109,18 +107,18 @@ public class Red_Near extends LinearOpMode {
 
         LLResult llResult;
 
-        Pose2d initialPose = new Pose2d(-39, 55, Math.toRadians(180));
-        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
+        Pose2d initialPose = new Pose2d(-39, 54, Math.toRadians(180));
+//        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
 
         Pose2d tagCheck = new Pose2d(new Vector2d(-36, 36), Math.toRadians(-135));
-        Pose2d firstShot = new Pose2d(new Vector2d(-12, 10), Math.toRadians(138));
+        Pose2d firstShot = new Pose2d(new Vector2d(-16, 14), Math.toRadians(142));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(-15, 19), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(-15, 40), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(-12, 32), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(-12, 48), Math.toRadians(90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(9, 19), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(9, 40), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(12, 32), Math.toRadians(90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(12, 48), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
 
@@ -199,7 +197,8 @@ public class Red_Near extends LinearOpMode {
             m_robot.lights.setYellow();
         }
 
-        m_robot.shooter.setupShooter(0.25, 2650);
+
+        m_robot.shooter.setupShooter(0.25, 2700);
 
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
         m_robot.shooter.updateController();

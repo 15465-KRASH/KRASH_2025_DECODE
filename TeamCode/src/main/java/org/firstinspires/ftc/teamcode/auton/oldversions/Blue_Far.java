@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.auton;
+package org.firstinspires.ftc.teamcode.auton.oldversions;
 
 import android.annotation.SuppressLint;
 
@@ -70,9 +70,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Blue_Far_Skip", group = "Comp")
-//@Disabled
-public class Blue_Far_Skip extends LinearOpMode {
+@Autonomous(name = "Blue_Far", group = "Comp")
+@Disabled
+public class Blue_Far extends LinearOpMode {
 
     enum PIDFVals {
         P,
@@ -164,12 +164,6 @@ public class Blue_Far_Skip extends LinearOpMode {
                 .splineToLinearHeading(finalPos, Math.toRadians(-179.9));
 
         Action finalPosAction = finalPosTraj.build();
-
-        TrajectoryActionBuilder shotParkTraj = shootSecondTraj.endTrajectory().fresh()
-                .lineToX(firstShot.position.x - 10);
-
-        Action shotParkAction = shotParkTraj.build();
-
 
 
         // Wait for the game to start (driver presses START)
@@ -269,24 +263,21 @@ public class Blue_Far_Skip extends LinearOpMode {
         }
         telemetry.update();
 
-//        Actions.runBlocking(new ParallelAction(
-//                intakeAction,
-//                pickupSecondAction
-//        ));
-//
-//        m_robot.spindexer.initSpindexer(1);
-//
-//        for(int x = 0; x <=2; x++){
-//            telemetry.addLine()
-//                    .addData("Slot[", x)
-//                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
-//        }
-//        telemetry.update();
-
-
         Actions.runBlocking(new ParallelAction(
-                shotParkAction,
-                intakeAction));
+                intakeAction,
+                pickupSecondAction
+        ));
+
+        m_robot.spindexer.initSpindexer(1);
+
+        for(int x = 0; x <=2; x++){
+            telemetry.addLine()
+                    .addData("Slot[", x)
+                    .addData("] ->", m_robot.spindexer.getSlotColor(x).name());
+        }
+        telemetry.update();
+
+        Actions.runBlocking(finalPosAction);
 
 //        m_robot.shooter.setTargetSpeed(shooterRPM);
 //        m_robot.shooter.updateController();
