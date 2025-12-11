@@ -44,6 +44,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.actions.AlignSpindexer;
 import org.firstinspires.ftc.teamcode.actions.IntakeArtifact;
 import org.firstinspires.ftc.teamcode.actions.ScanIntake;
 import org.firstinspires.ftc.teamcode.actions.ShootAllVariant;
@@ -125,6 +126,7 @@ public class Drive_OpMode extends LinearOpMode {
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
+        AlignSpindexer autoAlignAction = new AlignSpindexer(m_robot.spindexer);
 
         //PIDFVals pidfSel = PIDFVals.P;
 
@@ -137,6 +139,7 @@ public class Drive_OpMode extends LinearOpMode {
         ButtonState shootPurple = new ButtonState(gamepad2, ButtonState.Button.right_stick_button);
         ButtonState shootAny = new ButtonState(gamepad2, ButtonState.Button.left_bumper);
         ButtonState scanIntake = new ButtonState(gamepad2, ButtonState.Button.back);
+        ButtonState autoZeroSpindexer = new ButtonState(gamepad2, ButtonState.Button.dpad_up);
 
         ButtonState intakeArtifact = new ButtonState(gamepad2, ButtonState.Button.a);
         ButtonState zeroSpindexer = new ButtonState(gamepad2, ButtonState.Button.x);
@@ -344,6 +347,13 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.spindexer.resetPos();
             } else {
                 m_robot.spindexer.updateController();
+            }
+
+            if(autoZeroSpindexer.newPress()){
+                autoAlignAction.clearCancel();
+                runningActions.add(autoAlignAction);
+            } else if(autoZeroSpindexer.newRelease()){
+                autoAlignAction.cancel();
             }
 
 //            if(readColors.getCurrentPress()) {

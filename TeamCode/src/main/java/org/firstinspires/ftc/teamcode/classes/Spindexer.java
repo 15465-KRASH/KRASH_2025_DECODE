@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -30,6 +31,9 @@ public class Spindexer {
     public DcMotorEx rotationMotor; //Expansion Hub Motor Port 3
     public PIDFCoefficients pidfCoefficients;
     public PIDFCoefficients pidfCoefficientsClose;
+
+    private TouchSensor magSensor;
+    private boolean hasMagSensor = false;
 
     //PIDEx Setup
     public static double Kp = 0.006;
@@ -108,6 +112,10 @@ public class Spindexer {
         rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rotationMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        if(hasMagSensor){
+            magSensor = hardwareMap.get(TouchSensor.class, "magsensor");
+        }
 
 //        pidfCoefficients =  rotationMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
 //        pidfCoefficients.p = 7.5;
@@ -555,6 +563,24 @@ public class Spindexer {
                 rotationMotor.setTargetPosition(waggleTarget - waggleStep);
             }
         }
+    }
+
+    public boolean getHasMagSensor(){
+        return hasMagSensor;
+    }
+
+    public boolean readMagSensor(){
+        if(hasMagSensor){
+            return magSensor.isPressed();
+        } else {
+            return false;
+        }
+    }
+
+    public void gotoAlignPos(int targetSlot){
+        int alignOffset = rot/4;
+        moveToIntakePos(targetSlot);
+        rotationMotor.setTargetPosition(rotationMotor.getTargetPosition() - alignOffset);
     }
 
 }
