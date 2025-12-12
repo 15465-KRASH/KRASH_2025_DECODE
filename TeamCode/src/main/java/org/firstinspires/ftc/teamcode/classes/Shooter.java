@@ -138,8 +138,8 @@ public class Shooter {
             flywheel.setPower(0);
         }
 
-//        telemetry.addData("currentSpeed: ", currentSpeed);
-//        telemetry.addData("targetSpeed: ", targetSpeed);
+        telemetry.addData("currentSpeed: ", currentSpeed);
+        telemetry.addData("targetSpeed: ", targetSpeed);
 //        telemetry.addData("targetAccel: ", targetAccel);
 //        telemetry.addData("pidOutput: ", pidOutput);
 //        telemetry.addData("ffoutput: ", ffOutput);

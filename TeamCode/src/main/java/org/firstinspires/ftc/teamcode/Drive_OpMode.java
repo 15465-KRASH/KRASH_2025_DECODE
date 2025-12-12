@@ -126,7 +126,7 @@ public class Drive_OpMode extends LinearOpMode {
         IntakeArtifact intakeAction = new IntakeArtifact(m_robot.intake, m_robot.spindexer, false);
         ShootAllVariant shootAction = new ShootAllVariant(m_robot.shooter, m_robot.spindexer);
         ScanIntake scanAction = new ScanIntake(m_robot.spindexer);
-        AlignSpindexer autoAlignAction = new AlignSpindexer(m_robot.spindexer);
+        AlignSpindexer autoAlignAction = new AlignSpindexer(m_robot.spindexer, telemetry);
 
         //PIDFVals pidfSel = PIDFVals.P;
 
@@ -345,7 +345,8 @@ public class Drive_OpMode extends LinearOpMode {
             } else if (scanIntake.newRelease()){
                 m_robot.spindexer.stop();
                 m_robot.spindexer.resetPos();
-            } else {
+            } else if(!autoAlignAction.isRunning()) {
+                telemetry.addData("Updating Spindexer",0);
                 m_robot.spindexer.updateController();
             }
 

@@ -33,7 +33,7 @@ public class Spindexer {
     public PIDFCoefficients pidfCoefficientsClose;
 
     private TouchSensor magSensor;
-    private boolean hasMagSensor = false;
+    private boolean hasMagSensor = true;
 
     //PIDEx Setup
     public static double Kp = 0.006;

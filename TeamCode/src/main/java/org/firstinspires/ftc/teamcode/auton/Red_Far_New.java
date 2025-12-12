@@ -100,7 +100,7 @@ public class Red_Far_New extends LinearOpMode {
         TelemetryPacket packet = new TelemetryPacket();
 
         int tagID = 0;
-        int shooterRPM = 3250;
+        int shooterRPM = 3300;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -115,7 +115,7 @@ public class Red_Far_New extends LinearOpMode {
         Pose2d startPickup = new Pose2d(new Vector2d(36, 32), Math.toRadians(90));
         Pose2d finishPickup = new Pose2d(new Vector2d(36, 48), Math.toRadians(90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(12, 31), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(12, 30), Math.toRadians(90));
         Pose2d finish2ndPickup = new Pose2d(new Vector2d(12, 48), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 36), Math.toRadians(90));

@@ -107,18 +107,18 @@ public class Red_Near extends LinearOpMode {
 
         LLResult llResult;
 
-        Pose2d initialPose = new Pose2d(-39, 54, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(-40, 54, Math.toRadians(180));
 //        HeadingStorage.zeroOffset = initialPose.heading.log() - Math.toRadians(90);
 
 
         Pose2d tagCheck = new Pose2d(new Vector2d(-36, 36), Math.toRadians(-135));
-        Pose2d firstShot = new Pose2d(new Vector2d(-16, 14), Math.toRadians(142));
+        Pose2d firstShot = new Pose2d(new Vector2d(-16, 14), Math.toRadians(135));
 
-        Pose2d startPickup = new Pose2d(new Vector2d(-12, 32), Math.toRadians(90));
-        Pose2d finishPickup = new Pose2d(new Vector2d(-12, 48), Math.toRadians(90));
+        Pose2d startPickup = new Pose2d(new Vector2d(-10, 28.5), Math.toRadians(90));
+        Pose2d finishPickup = new Pose2d(new Vector2d(-10, 46), Math.toRadians(90));
 
-        Pose2d start2ndPickup = new Pose2d(new Vector2d(12, 32), Math.toRadians(90));
-        Pose2d finish2ndPickup = new Pose2d(new Vector2d(12, 48), Math.toRadians(90));
+        Pose2d start2ndPickup = new Pose2d(new Vector2d(14, 28), Math.toRadians(90));
+        Pose2d finish2ndPickup = new Pose2d(new Vector2d(14, 46), Math.toRadians(90));
 
         Pose2d finalPos = new Pose2d(new Vector2d(0, 38), Math.toRadians(90));
 
@@ -197,7 +197,7 @@ public class Red_Near extends LinearOpMode {
             m_robot.lights.setYellow();
         }
 
-
+        m_robot.shooter.setNotIdle();
         m_robot.shooter.setupShooter(0.25, 2700);
 
         shootAction.selectShot(ShootAllVariant.ShotType.ShootPattern);
@@ -214,14 +214,14 @@ public class Red_Near extends LinearOpMode {
                 firstShotAction,
                 m_robot.shooter.updateFlywheel(),
                 m_robot.updateLimelight()));
-        sleep(500);
+        sleep(0);
         tagID = m_robot.getObeliskTag().tagID;
         if(tagID < 21 || tagID > 23){
             tagID = 21;
         }
         MatchInfo.patternGreenPos = tagID - 21;
         shootAction.setShotOrder(tagID - 21);
-        sleep(1000);
+        sleep(0);
         telemetry.addData("Tag ID: ", tagID);
         telemetry.addData("1st Shot:", shootAction.shotOrder[0].toString());
         telemetry.addData("2st Shot:", shootAction.shotOrder[1].toString());
@@ -250,6 +250,7 @@ public class Red_Near extends LinearOpMode {
         }
         telemetry.update();
 
+        m_robot.shooter.setNotIdle();
         m_robot.shooter.setupShooter(0.25, 2700);
         m_robot.shooter.updateController();
 

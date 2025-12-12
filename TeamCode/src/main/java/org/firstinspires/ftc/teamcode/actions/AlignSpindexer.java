@@ -6,22 +6,26 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.classes.Spindexer;
 
 public class AlignSpindexer implements Action {
+    private Telemetry telemetry;
+
     private boolean initialized = false;
     private boolean running = true;
     private boolean waiting = false;
     private boolean canceled = false;
     private int targetSlot = 0;
 
-    private double holdTime = 0.05;
+    private double holdTime = 0.1;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
     private Spindexer spindexer;
 
-    public AlignSpindexer(Spindexer spindexer){
+    public AlignSpindexer(Spindexer spindexer, Telemetry telemetry){
+        this.telemetry = telemetry;
         this.spindexer = spindexer;
     }
 
@@ -39,6 +43,8 @@ public class AlignSpindexer implements Action {
             waiting = timer.seconds() < holdTime;
 
             if (running && spindexer.atTarget() && !waiting) {
+                telemetry.addData("Manual Move:", 0);
+                telemetry.addData("MagSensor", spindexer.readMagSensor());
                 spindexer.manualSpindexer();
                 if(spindexer.readMagSensor()){
                     spindexer.stop();
@@ -63,6 +69,10 @@ public class AlignSpindexer implements Action {
         initialized = false;
         running = false;
         spindexer.stop();
+    }
+
+    public boolean isRunning(){
+        return running;
     }
 
 
