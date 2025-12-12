@@ -15,10 +15,11 @@ public class AlignSpindexer implements Action {
     private boolean initialized = false;
     private boolean running = true;
     private boolean waiting = false;
+    private boolean startedAlign = false;
     private boolean canceled = false;
     private int targetSlot = 0;
 
-    private double holdTime = 0.1;
+    private double holdTime = 0.2;
 
     private ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
@@ -33,8 +34,11 @@ public class AlignSpindexer implements Action {
     public boolean run(@NonNull TelemetryPacket packet) {
         if (!canceled) {
             if (!initialized) {
-                spindexer.gotoAlignPos(targetSlot);
+//                spindexer.gotoAlignPos(targetSlot);
+//                spindexer.updateController();
+                spindexer.autoAlignMoveSpindexer();
                 initialized = true;
+                startedAlign = false;
                 running = true;
                 waiting = true;
                 timer.reset();
@@ -42,15 +46,43 @@ public class AlignSpindexer implements Action {
 
             waiting = timer.seconds() < holdTime;
 
-            if (running && spindexer.atTarget() && !waiting) {
+            if (running && !waiting && !startedAlign) {
                 telemetry.addData("Manual Move:", 0);
                 telemetry.addData("MagSensor", spindexer.readMagSensor());
-                spindexer.manualSpindexer();
+                spindexer.autoAlignMoveSpindexer();
+                startedAlign = true;
                 if(spindexer.readMagSensor()){
                     spindexer.stop();
                     spindexer.resetPos();
+                    running = false;
                 }
+            } else if(running && startedAlign){
+                telemetry.addData("Manual Move:", 0);
+                telemetry.addData("MagSensor", spindexer.readMagSensor());
+                spindexer.autoAlignMoveSpindexer();
+                if(spindexer.readMagSensor()){
+                    spindexer.stop();
+                    spindexer.resetPos();
+                    running = false;
+                }
+//                else if(Math.abs(spindexer.getSpindexerPos()) > 2 * spindexer.spindexerStep){
+//
+//                    waiting = true;
+//                    startedAlign = false;
+//                    timer.reset();
+//                    spindexer.stop();
+//                    spindexer.gotoAlignPos(targetSlot);
+//                    spindexer.updateController();
+//                    running = false;
+//                }
+            } else if(waiting){
+                spindexer.updateController();
             }
+            if(!running){
+                canceled = false;
+                cleanup();
+            }
+            telemetry.update();
             return running;
         } else {
             canceled = false;
@@ -67,6 +99,7 @@ public class AlignSpindexer implements Action {
 
     public void cleanup(){
         initialized = false;
+        startedAlign = false;
         running = false;
         spindexer.stop();
     }

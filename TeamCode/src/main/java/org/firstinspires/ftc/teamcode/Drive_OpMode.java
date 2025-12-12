@@ -335,6 +335,14 @@ public class Drive_OpMode extends LinearOpMode {
                 m_robot.intake.stop();
             }
 
+            if(autoZeroSpindexer.newPress()){
+                autoAlignAction.clearCancel();
+                runningActions.add(autoAlignAction);
+            } else if(autoZeroSpindexer.newRelease()){
+                autoAlignAction.cancel();
+                m_robot.spindexer.resetPos();
+            }
+
             if(zeroSpindexer.getCurrentPress()){
                 m_robot.spindexer.manualSpindexer();
             } else if (zeroSpindexer.newRelease()){
@@ -345,17 +353,12 @@ public class Drive_OpMode extends LinearOpMode {
             } else if (scanIntake.newRelease()){
                 m_robot.spindexer.stop();
                 m_robot.spindexer.resetPos();
-            } else if(!autoAlignAction.isRunning()) {
+            } else if(!autoZeroSpindexer.getCurrentPress()) {
                 telemetry.addData("Updating Spindexer",0);
                 m_robot.spindexer.updateController();
             }
 
-            if(autoZeroSpindexer.newPress()){
-                autoAlignAction.clearCancel();
-                runningActions.add(autoAlignAction);
-            } else if(autoZeroSpindexer.newRelease()){
-                autoAlignAction.cancel();
-            }
+
 
 //            if(readColors.getCurrentPress()) {
 //                m_robot.spindexer.getSpindexerPos();

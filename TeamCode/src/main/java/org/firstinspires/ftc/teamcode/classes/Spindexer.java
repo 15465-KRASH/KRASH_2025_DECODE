@@ -455,6 +455,11 @@ public class Spindexer {
         rotationMotor.setPower(0.15);
     }
 
+    public void autoAlignMoveSpindexer(){
+        rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotor.setPower(-0.10);
+    }
+
     public void manualInvertSpindexer(){
         rotationMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rotationMotor.setPower(-0.15);
@@ -540,6 +545,7 @@ public class Spindexer {
     public void resetPos(){
         rotationMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rotationMotor.setTargetPosition(0);
+        rotationMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public double calcKs(){
@@ -573,6 +579,7 @@ public class Spindexer {
         if(hasMagSensor){
             return magSensor.isPressed();
         } else {
+            telemetry.addData("Somethings wrong!!", 0);
             return false;
         }
     }

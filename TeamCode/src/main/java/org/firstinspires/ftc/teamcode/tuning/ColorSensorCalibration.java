@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.sun.source.doctree.StartElementTree;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.classes.ButtonState;
@@ -82,6 +83,8 @@ public class ColorSensorCalibration extends LinearOpMode {
                 gain = spindexer.decrementIntakeGain(step);
             }
             telemetry.addData("Gain: ", gain);
+
+            telemetry.addData("MagSensor", spindexer.readMagSensor());
 
             spindexer.readIntakeHSV();
 
